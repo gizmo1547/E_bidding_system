@@ -19,7 +19,7 @@ app.use(express.json())
 
 //Test get method
 app.get("/", (req,res)=>{
-    res.json("hello this is the backend from here to there:)")
+    res.json("Hello this is the backend from here to there:)")
 })
 
 //Test User table from mySQL
