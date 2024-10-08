@@ -1,5 +1,6 @@
 import express from "express"
 import mysql from "mysql"
+import cors from "cors"
 
 const app = express()
 //Connecting to data base
@@ -16,14 +17,18 @@ const db = mysql.createConnection({
 
 
 app.use(express.json())
+app.use(cors())
+
+
+
 
 //Test get method
 app.get("/", (req,res)=>{
-    res.json("Hello this is the backend from here to there:)")
+    res.json("hello this is the backend from here to there:)")
 })
 
 //Test User table from mySQL
-app.get("/user", (req,res)=>{
+app.get("/users", (req,res)=>{
   const q = "SELECT * FROM user"
 db.query(q,(err,data)=>{
     if(err) return res.json(err)
@@ -59,7 +64,7 @@ app.post("/user", (req, res) => {
 */
 
 //Testing post method
-app.post("/user", (req, res) => {
+app.post("/users", (req, res) => {
   const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
   
   const values = [
@@ -83,6 +88,39 @@ app.post("/user", (req, res) => {
     return res.json(data);
   });
 });
+
+
+// Login function with real database check
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Query to find the user by username
+  const query = "SELECT * FROM user WHERE Username = ?";
+  
+  db.query(query, [username], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    if (result.length === 0) {
+      // If no user is found, respond with an error
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Fetch the first (and only) user from the result
+    const user = result[0];
+
+    // Check if the provided password matches the password from the database
+    if (user.Password === password) {
+      // If password matches, respond with a success message (you can also generate a token here)
+      res.json({ message: 'Login successful', token: 'fake-jwt-token' });
+    } else {
+      // If the password doesn't match, respond with an error
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  });
+});
+
+
+
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
