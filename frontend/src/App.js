@@ -7,6 +7,7 @@ import Users from "./pages/Users";
 import Add from "./pages/Add";
 import Update from "./pages/Update";
 import Home from "./pages/Home";
+import Registration from "./pages/Registration";
 
 
 function App()
@@ -19,6 +20,7 @@ function App()
         <Route path="/users" element={<Users/>}/>
         <Route path="/add" element={<Add/>}/>
         <Route path="/update" element={<Update/>}/>
+        <Route path="/registration" element={<Registration/>}/>
        </Routes>
       
       </BrowserRouter>
