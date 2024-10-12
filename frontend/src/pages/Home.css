@@ -1,63 +1,71 @@
+/* Home.css */
+
 .home-container {
-    text-align: center;
-    padding: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.home-container h1 {
+  font-size: 3em;
+  margin-bottom: 50px;
+  text-shadow: 2px 2px #000;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 20px;
+}
+
+.login-button,
+.signup-button {
+  padding: 15px 30px;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.login-button {
+  background-color: #6a11cb;
+  background-image: linear-gradient(315deg, #6a11cb 0%, #2575fc 74%);
+  color: #fff;
+}
+
+.signup-button {
+  background-color: #11998e;
+  background-image: linear-gradient(315deg, #11998e 0%, #38ef7d 74%);
+  color: #fff;
+}
+
+.login-button:hover {
+  background-image: linear-gradient(315deg, #2575fc 0%, #6a11cb 74%);
+}
+
+.signup-button:hover {
+  background-image: linear-gradient(315deg, #38ef7d 0%, #11998e 74%);
+}
+
+@media (max-width: 600px) {
+  .home-container h1 {
+    font-size: 2em;
   }
-  
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 30px;
+
+  .buttons-container {
+    flex-direction: column;
+    gap: 15px;
   }
-  
-  .login-form {
-    display: inline-block;
-    text-align: left;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .input-group {
-    margin-bottom: 15px;
-  }
-  
-  .input-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .input-group input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  .buttons {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .login-button, .signup-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .login-button {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
+
+  .login-button,
   .signup-button {
-    background-color: #008CBA;
-    color: white;
+    width: 100%;
   }
-  
-  .login-button:hover, .signup-button:hover {
-    opacity: 0.8;
-  }
-  
+}
