@@ -9,7 +9,8 @@ import Update from "./pages/Update";
 import Home from "./pages/Home";
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
-
+import PrivateRoute from './pages/PrivateRoute';
+import Dashboard from './pages/Dashboard';
 
 function App()
 {
@@ -23,6 +24,8 @@ function App()
         <Route path="/update" element={<Update/>}/>
         <Route path="/registration" element={<Registration/>}/>
         <Route path="/login" element={<Login/>}/>
+        <Route path="/privateroute" element={<PrivateRoute/>}/>
+        <Route path="/dashboard" element={<Dashboard/>}/>
        </Routes>
       
       </BrowserRouter>
