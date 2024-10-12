@@ -1,46 +1,74 @@
+/* Registration.css */
+
 .registration-container {
-    max-width: 400px;
-    margin: auto;
-    padding: 20px;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .registration-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  .registration-container form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .registration-container label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .registration-container input[type="text"],
+  .registration-container input[type="email"],
+  .registration-container input[type="password"],
+  .registration-container input[type="number"] {
+    padding: 12px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-h2 {
-    text-align: center;
-}
-
-form div {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-input, select {
+  }
+  
+  .registration-container input[type="number"] {
     width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
+  }
+  
+  .registration-container button {
+    padding: 15px;
+    background-color: #4e54c8;
+    background-image: linear-gradient(315deg, #4e54c8 0%, #8f94fb 74%);
+    color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-p {
+    font-size: 1em;
+    transition: background 0.3s ease;
+  }
+  
+  .registration-container button:hover {
+    background-image: linear-gradient(315deg, #8f94fb 0%, #4e54c8 74%);
+  }
+  
+  .registration-container p {
     text-align: center;
-    color: red; /* Or change color based on success */
-}
+    margin-top: 20px;
+    color: #e74c3c;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 600px) {
+    .registration-container {
+      margin: 20px;
+      padding: 30px;
+    }
+  }
+  
+  
