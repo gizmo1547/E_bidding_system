@@ -11,6 +11,10 @@ import Registration from "./pages/Registration";
 import Login from "./pages/Login";
 import PrivateRoute from './pages/PrivateRoute';
 import Dashboard from './pages/Dashboard';
+import UserHome from './pages/UserHome'; // New component
+import AddMoney from './pages/AddMoney'; // New component
+import AccountManager from './pages/AccountManager'; // New component
+import AdminRoute from './pages/AdminRoute'; // New component
 
 function App()
 {
@@ -25,7 +29,11 @@ function App()
         <Route path="/registration" element={<Registration/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/privateroute" element={<PrivateRoute/>}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/dashboard" element={<AdminRoute><Dashboard/></AdminRoute>}/>
+        <Route path="/add-money" element={<PrivateRoute><AddMoney/></PrivateRoute>} />
+        <Route path="/user-home" element={<PrivateRoute><UserHome/></PrivateRoute>} />
+        <Route path="/account-manager" element={<PrivateRoute><AccountManager/></PrivateRoute>} />
+        
        </Routes>
       
       </BrowserRouter>

@@ -91,37 +91,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-/*// Registration route
-app.post("/users", async (req, res) => {
-  const { username, password, email, userAnswer, correctAnswer } = req.body;
 
-  // Validate arithmetic question
-  if (parseInt(userAnswer) !== parseInt(correctAnswer)) {
-    return res.status(400).json({ message: 'Incorrect arithmetic answer.' });
-  }
-
-  try {
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'Visitor', 0, 0, 0, 0, 0, 0, 1, NOW())";
-
-    const values = [
-      username,
-      hashedPassword,
-      email
-    ];
-
-    // Execute the query
-    db.query(q, values, (err, data) => {
-      if (err) return res.json(err);
-      return res.json({ message: 'Registration successful' });
-    });
-  } catch (err) {
-    console.error('Error during registration:', err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-}); */
 
 // Registration route
 app.post("/users", async (req, res) => {
@@ -135,7 +105,7 @@ app.post("/users", async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'Visitor', 0, 0, 0, 0, 0, 0, 1, NOW())";
+  const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'User', 0, 0, 0, 0, 0, 0, 1, NOW())";
 
   const values = [
       username,
@@ -200,13 +170,49 @@ app.post('/login', async (req, res) => {
       // If password matches, generate a JWT token
       const userPayload = { id: user.UserID, role: user.Role }; // Adjust 'UserID' to match your DB schema
       const token = jwt.sign(userPayload, 'your_jwt_secret', { expiresIn: '1h' });
-      res.json({ message: 'Login successful', token });
+      res.json({ message: 'Login successful', token, role: user.Role });
     } else {
       // If the password doesn't match, respond with an error
       res.status(401).json({ message: 'Invalid credentials' });
     }
   });
 });
+
+// Update Email route
+app.post('/update-email', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { email } = req.body;
+
+  const q = "UPDATE user SET Email = ? WHERE UserID = ?";
+
+  db.query(q, [email, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Email updated successfully' });
+  });
+});
+
+
+// Add Money route
+app.post('/add-money', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { amount } = req.body;
+
+  // Validate amount
+  if (amount <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  // Update user's account balance
+  const q = "UPDATE user SET AccountBalance = AccountBalance + ? WHERE UserID = ?";
+
+  db.query(q, [amount, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Account balance updated successfully' });
+  });
+});
+
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
