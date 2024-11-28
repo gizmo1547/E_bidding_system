@@ -180,3 +180,9 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+--Database Adjustments
+ALTER TABLE User MODIFY Role ENUM('Visitor', 'User', 'SuperUser') NOT NULL DEFAULT 'User';
+--Manually insert a super user into your database
+INSERT INTO User (Username, Password, Email, Role, IsActive, RegistrationDate)
+VALUES ('admin', '$2b$10$Vj8DbhGWmRcA2DNIPtJHR.rqHUs0WDdo3WBDEz1pxPdTJlPl//GF6', 'admin@example.com', 'SuperUser', 1, NOW());
