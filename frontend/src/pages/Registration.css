@@ -1,74 +1,227 @@
 /* Registration.css */
 
+
 .registration-container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 40px;
-    background-color: #fff;
-    border-radius: 10px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 700px; 
+  width: 90%; 
+  min-height: 650px; 
+  margin: auto;
+  padding: 50px; 
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px; 
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); 
+  text-align: center;
+  animation: fadeIn 1s ease-out;
+}
+.registration-container h2 {
+  color: #56ab2f;
+  font-size: 2.3em; 
+  font-weight: 500;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.registration-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.registration-container label {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #5a9691;
+  text-align: left;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.registration-container input[type="text"],
+.registration-container input[type="email"],
+.registration-container input[type="password"],
+.registration-container input[type="number"] {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f1f1;
+  font-size: 1.1em;
+  color: #333;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.registration-container input:focus {
+  background: #fff;
+  box-shadow: 0 0 8px rgba(17, 153, 142, 0.5);
+  transform: scale(1.03);
+  outline: none;
+}
+
+.registration-container button {
+  padding: 13px;
+  background: linear-gradient(135deg, #5b7e7b, #698eb3);
+  color: #000000;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1em;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.registration-container button:hover {
+  background: linear-gradient(315deg, #3a8b59 0%, #127a72 74%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.registration-container a {
+  color: #4e54c8;
+  margin-top: 2px;
+  font-size: 1em;
+  transition: color 0.3s;
+}
+
+.registration-container a:hover {
+  color: #8f94fb;
+}
+
+.registration-container .error {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+@media (max-width: 600px) {
+  .registration-container {
+    padding: 30px;
+    border-radius: 20px;
   }
-  
+
   .registration-container h2 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #333;
+    font-size: 2em;
   }
-  
-  .registration-container form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .registration-container label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #555;
-  }
-  
-  .registration-container input[type="text"],
-  .registration-container input[type="email"],
-  .registration-container input[type="password"],
-  .registration-container input[type="number"] {
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .registration-container input[type="number"] {
-    width: 100%;
-  }
-  
+
   .registration-container button {
-    padding: 15px;
-    background-color: #4e54c8;
-    background-image: linear-gradient(315deg, #4e54c8 0%, #8f94fb 74%);
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
     font-size: 1em;
-    transition: background 0.3s ease;
+    padding: 15px;
   }
-  
-  .registration-container button:hover {
-    background-image: linear-gradient(315deg, #8f94fb 0%, #4e54c8 74%);
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  
-  .registration-container p {
-    text-align: center;
-    margin-top: 20px;
-    color: #e74c3c;
-    font-weight: bold;
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  @media (max-width: 600px) {
-    .registration-container {
-      margin: 20px;
-      padding: 30px;
-    }
+}
+.registration-container h2 {
+  color: #2b504d;
+  font-size: 2.3em; 
+  font-weight: 500;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.registration-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Increased gap between form elements */
+}
+
+.registration-container label {
+  font-weight: bold;
+  font-size: 1.2em; /* Slightly larger labels */
+  color: #5a9691;
+  text-align: left;
+  display: block;
+  margin-bottom: 8px; /* More breathing room */
+}
+
+.registration-container input[type="text"],
+.registration-container input[type="email"],
+.registration-container input[type="password"],
+.registration-container input[type="number"] {
+  padding: 10px; /* Larger padding for better usability */
+  border: none;
+  border-radius: 10px;
+  background: #f1f1f1;
+  font-size: 1.1em; /* Larger font size for better readability */
+  color: #333;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.registration-container input:focus {
+  background: #fff;
+  box-shadow: 0 0 8px rgba(17, 153, 142, 0.5);
+  transform: scale(1.03); /* Slightly more pronounced focus effect */
+  outline: none;
+}
+
+.registration-container button {
+  padding: 13px; /* Larger padding for a bold button */
+  background: linear-gradient(135deg, #5b7e7b, #698eb3);
+  color: #000000;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1em; /* Larger button text */
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.registration-container button:hover {
+  background: linear-gradient(315deg, #3a8b59 0%, #127a72 74%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.registration-container a {
+  color: #4e54c8;
+  margin-top: 2px;
+  font-size: 1em;
+  transition: color 0.3s;
+}
+
+.registration-container a:hover {
+  color: #8f94fb;
+}
+
+.registration-container .error {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+@media (max-width: 600px) {
+  .registration-container {
+    padding: 30px; /* Adjust padding for smaller screens */
+    border-radius: 20px;
   }
-  
-  
+
+  .registration-container h2 {
+    font-size: 2em;
+  }
+
+  .registration-container button {
+    font-size: 1em;
+    padding: 15px;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

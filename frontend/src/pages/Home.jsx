@@ -1,105 +1,131 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.css'; // Optional for styling
+import Item from '../components/Item';
+import './Home.css';
 
 const Home = () => {
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [items, setItems] = useState([ // All items to be divided into sections
+        { title: 'Item 1', imgSrc: '/images/itemIcon.png', description: 'Description of item 1' },
+        { title: 'Item 2', imgSrc: '/images/itemIcon.png', description: 'Description of item 2' },
+        { title: 'Item 3', imgSrc: '/images/itemIcon.png', description: 'Description of item 3' },
+        { title: 'Item 4', imgSrc: '/images/itemIcon.png', description: 'Description of item 4' },
+        { title: 'Item 5', imgSrc: '/images/itemIcon.png', description: 'Description of item 5' },
+        // More items could go here...
+    ]);
+    const navigate = useNavigate();
 
-  // Function to navigate to the login page
-  const handleLogin = () => {
-    navigate('/login');
-  };
+    useEffect(() => {
+        // Check if the token exists in localStorage
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, []);
 
-  // Function to navigate to the registration (sign-up) page
-  const handleSignUp = () => {
-    navigate('/registration');
-  };
-
-  return (
-    <div className="home-container">
-      <h1>Welcome to E-Bidding Store</h1>
-      <div className="buttons-container">
-        <button className="login-button" onClick={handleLogin}>Login</button>
-        <button className="signup-button" onClick={handleSignUp}>Sign Up</button>
-      </div>
-    </div>
-  );
-};
-
-export default Home;
-
-/*
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Change to useNavigate
-import axios from 'axios';
-import './Home.css'; // Optional for styling
-
-const Home = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate
-
-  // Function to handle login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    const loginData = {
-      username: username,
-      password: password,
+    const handleLogout = () => {
+        // Clear the token and update the login state
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        navigate('/login'); // Redirect to the login page
     };
 
-    try {
-      const res = await axios.post('http://localhost:8000/login', loginData);
-      console.log('Login successful:', res.data);
-      // Redirect or store token here
-      // window.location.href = '/dashboard';
-    } catch (err) {
-      console.error('Login failed:', err.response ? err.response.data : err.message);
-      alert('Invalid username or password');
-    }
-  };
+    return (
+        <div>
+            {isLoggedIn ? (
+                <div>
+                    <h1>Welcome! You are logged in.</h1>
+                    <button onClick={handleLogout}>Logout</button>
+                </div>
+            ) : (
+                <div>
+                    <div className='login-bar'>
+                        <h1>Shopbid! </h1>
+                        <div className='button-container'>
+                            <button onClick={() => navigate('/login')}> Login</button>
+                            <button onClick={() => navigate('/registration')}>Registrate</button>
+                        </div>
+                    </div>
+                    <div className='menu-bar'>
+                        <div className='categories'>
+                            <h2>Categories</h2>
+                            <ul>
+                              <li onClick={() => navigate('/login')}>Electronics</li>
+                              <li onClick={() => navigate('/login')}>Home & Garden</li>
+                              <li onClick={() => navigate('/login')}>Automotive</li>
+                              <li onClick={() => navigate('/login')}>Books</li>
+                              <li onClick={() => navigate('/login')}>Clothing</li>
+                              <li onClick={() => navigate('/login')}>Health & Beauty</li>
+                            </ul>
+                        </div>
+                        <div className='options'>
+                            <h2>Options</h2>
+                            <ul onClick={navigate()}>
+                              <li onClick={() => navigate('/login')}>My Items</li>
+                              <li onClick={() => navigate('/login')}>My Bids</li>
+                              <li onClick={() => navigate('/login')}>My Account</li>
+                              <li onClick={() => navigate('/login')}>Help</li>
+                            </ul>
+                        </div>
+                    </div>
 
-  const handleSignUp = () => {
-    navigate('/registration'); // Use navigate to redirect to the registration page
-  };
+                    <div className='description'>
+                        <p>"Welcome to Shopbid, the premier online auction platform. Whether you're new or returning, explore a variety of electronics, home goods, and more. Start bidding today!"</p>
+                    </div>
 
-  return (
-    <div className="home-container">
-      <h1>Welcome to E-Bidding Store</h1>
-      
-      <form onSubmit={handleLogin} className="login-form">
-        <div className="input-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter your username"
-            required
-          />
+                    {/* Most Sold Section */}
+                    <div className='items'>
+                        <h2>Most Sold</h2>
+                        <div className='card-deck'>
+                            {items.slice(0, 3).map((item, index) => ( // Display top 3 items for Most Sold
+                                <Item 
+                                    key={index}
+                                    title={item.title}
+                                    imgSrc={item.imgSrc}
+                                    description={item.description}
+                                />
+                            ))}
+                        </div>
+                        <button onClick={() => navigate('/most-sold')}>See More</button>
+                    </div>
+
+                    {/* Christmas Gifts Ideas Section */}
+                    <div className='items'>
+                        <h2>Christmas Gift Ideas</h2>
+                        <div className='card-deck'>
+                            {items.slice(3, 6).map((item, index) => ( // Display next set of items for Christmas Gifts
+                                <Item 
+                                    key={index}
+                                    title={item.title}
+                                    imgSrc={item.imgSrc}
+                                    description={item.description}
+                                />
+                            ))}
+                        </div>
+                        <button onClick={() => navigate('/christmas-gifts')}>See More</button>
+                    </div>
+
+                    {/* Top in Categories Section */}
+                    <div className='items'>
+                        <h2>Top in Categories</h2>
+                        <div className='card-deck'>
+                            {items.slice(0, 5).map((item, index) => ( // Display a mix of items for top categories
+                                <Item 
+                                    key={index}
+                                    title={item.title}
+                                    imgSrc={item.imgSrc}
+                                    description={item.description}
+                                />
+                            ))}
+                        </div>
+                        <button onClick={() => navigate('/top-categories')}>See More</button>
+                    </div>
+                </div>
+            )}
         </div>
-
-        <div className="input-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <div className="buttons">
-          <button type="submit" className="login-button">Login</button>
-          <button type="button" className="signup-button" onClick={handleSignUp}>Sign Up</button>
-        </div>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default Home;
-*/

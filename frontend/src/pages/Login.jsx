@@ -29,7 +29,7 @@ const Login = () => {
                 // Store token in localStorage or context
                 localStorage.setItem('token', res.data.token);
                 // Redirect to dashboard or another page after successful login
-                navigate('/dashboard');
+                navigate('/');
             }
         } catch (err) {
             console.error('Login failed:', err.response ? err.response.data : err.message);
@@ -39,7 +39,7 @@ const Login = () => {
 
     return (
         <div className="login-container">
-            <h2>Login</h2>
+            <h2>Shopbid Login</h2>
             <form onSubmit={handleLogin}>
                 <div className="input-group">
                     <label>Username:</label>
@@ -61,6 +61,7 @@ const Login = () => {
                 </div>
                 {errorMessage && <p className="error">{errorMessage}</p>}
                 <button type="submit">Login</button>
+                <a href="/registration">Don't have an account? Register here</a>
             </form>
         </div>
     );

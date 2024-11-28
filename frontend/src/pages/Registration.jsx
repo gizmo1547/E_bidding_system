@@ -128,6 +128,7 @@ const Registration = () => {
                     />
                 </div>
                 <button type="submit">Register</button>
+                <a href="/login">Already have an account? Login here</a>
             </form>
             {message && <p>{message}</p>} {/* Display message to user */}
         </div>
