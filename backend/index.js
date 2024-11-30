@@ -6,16 +6,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
-
-
-//const db = require('./db'); // Assuming you have a db.js for MySQL connection
 const app = express()
 //Connecting to data base
 const db = mysql.createConnection({
    host:"localhost",//change if need it
    user:"root",//change if need it
-   password:"GermanVoronovich",//change to your password
-   database:"e_bidding_system"
+   password:"Juninho99@",//change to your password
+   database:"sys"
 })
 
 
@@ -93,146 +90,38 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
-//superUser verify
-const verifySuperUser = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  // Verify token and extract user info (assuming JWT is used)
-  jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
-    if (err) return res.status(401).json({ message: 'Unauthorized' });
-    if (decoded.role !== 'SuperUser') {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
-    req.user = decoded;
-    next();
-  });
-};
-//superUser verify
-app.get('/admin/users', verifySuperUser, (req, res) => {
-  const q = `
-    SELECT UserID, Username, Email, Role, IsActive, IsSuspended, SuspensionCount, RegistrationDate
-    FROM User
-    WHERE Role != 'SuperUser'
-  `;
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    res.json(data);
-  });
-});
-//Suspended
-app.put('/admin/users/:id/suspend', verifySuperUser, (req, res) => {
-  const userId = req.params.id;
-  const { action } = req.body; // 'suspend' or 'activate'
 
-  let q;
-  if (action === 'suspend') {
-    q = `
-      UPDATE User SET IsSuspended = TRUE, SuspensionCount = SuspensionCount + 1
-      WHERE UserID = ?
-    `;
-  } else if (action === 'activate') {
-    q = `
-      UPDATE User SET IsSuspended = FALSE
-      WHERE UserID = ?
-    `;
-  } else {
-    return res.status(400).json({ message: 'Invalid action' });
+/*// Registration route
+app.post("/users", async (req, res) => {
+  const { username, password, email, userAnswer, correctAnswer } = req.body;
+
+  // Validate arithmetic question
+  if (parseInt(userAnswer) !== parseInt(correctAnswer)) {
+    return res.status(400).json({ message: 'Incorrect arithmetic answer.' });
   }
 
-  db.query(q, [userId], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: 'User updated successfully' });
-  });
-});
+  try {
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'Visitor', 0, 0, 0, 0, 0, 0, 1, NOW())";
 
+    const values = [
+      username,
+      hashedPassword,
+      email
+    ];
 
-//Items super user
-app.get('/admin/items', verifySuperUser, (req, res) => {
-  const q = `
-    SELECT ItemID, Title, Description, AskingPrice, ListingType, Status, ListingDate, Deadline, IsRemoved
-    FROM Item
-  `;
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    res.json(data);
-  });
-});
-
-//Superuser remove
-app.put('/admin/items/:id/remove', verifySuperUser, (req, res) => {
-  const itemId = req.params.id;
-
-  const q = `
-    UPDATE Item SET IsRemoved = TRUE
-    WHERE ItemID = ?
-  `;
-
-  db.query(q, [itemId], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: 'Item removed successfully' });
-  });
-});
-//super user complaints
-app.get('/admin/complaints', verifySuperUser, (req, res) => {
-  const q = `
-    SELECT c.ComplaintID, c.Content, c.ComplaintDate, c.IsResolved, u.Username AS Complainant, a.Username AS AgainstUser
-    FROM Complaint c
-    JOIN User u ON c.ComplainantID = u.UserID
-    JOIN User a ON c.AgainstUserID = a.UserID
-    WHERE c.IsResolved = FALSE
-  `;
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    res.json(data);
-  });
-});
-//rsolve complaints
-app.put('/admin/complaints/:id/resolve', verifySuperUser, (req, res) => {
-  const complaintId = req.params.id;
-  const resolvedBy = req.user.UserID; // Assuming req.user is set by verifySuperUser
-
-  const q = `
-    UPDATE Complaint SET IsResolved = TRUE, ResolvedBy = ?, ResolutionDate = NOW()
-    WHERE ComplaintID = ?
-  `;
-
-  db.query(q, [resolvedBy, complaintId], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: 'Complaint resolved successfully' });
-  });
-});
-
-
-//Applications
-app.get('/admin/applications', verifySuperUser, (req, res) => {
-  const q = `
-    SELECT a.ApplicationID, a.ArithmeticQuestion, a.ProvidedAnswer, a.IsApproved, u.Username AS VisitorUsername
-    FROM Application a
-    JOIN User u ON a.VisitorID = u.UserID
-    WHERE a.IsApproved = FALSE
-  `;
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    res.json(data);
-  });
-});
-
-//Approved
-app.put('/admin/applications/:id/approve', verifySuperUser, (req, res) => {
-  const applicationId = req.params.id;
-  const approvedBy = req.user.UserID;
-
-  const q = `
-    UPDATE Application SET IsApproved = TRUE, ApprovedBy = ?, ApprovalDate = NOW()
-    WHERE ApplicationID = ?
-  `;
-
-  db.query(q, [approvedBy, applicationId], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: 'Application approved successfully' });
-  });
-});
-
+    // Execute the query
+    db.query(q, values, (err, data) => {
+      if (err) return res.json(err);
+      return res.json({ message: 'Registration successful' });
+    });
+  } catch (err) {
+    console.error('Error during registration:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}); */
 
 // Registration route
 app.post("/users", async (req, res) => {
@@ -246,7 +135,7 @@ app.post("/users", async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'User', 0, 0, 0, 0, 0, 0, 1, NOW())";
+  const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'Visitor', 0, 0, 0, 0, 0, 0, 1, NOW())";
 
   const values = [
       username,
@@ -311,7 +200,7 @@ app.post('/login', async (req, res) => {
       // If password matches, generate a JWT token
       const userPayload = { id: user.UserID, role: user.Role }; // Adjust 'UserID' to match your DB schema
       const token = jwt.sign(userPayload, 'your_jwt_secret', { expiresIn: '1h' });
-      res.json({ message: 'Login successful', token, role: user.Role });
+      res.json({ message: 'Login successful', token });
     } else {
       // If the password doesn't match, respond with an error
       res.status(401).json({ message: 'Invalid credentials' });
@@ -319,40 +208,91 @@ app.post('/login', async (req, res) => {
   });
 });
 
-// Update Email route
-app.post('/update-email', authenticateToken, (req, res) => {
-  const userId = req.user.id;
-  const { email } = req.body;
 
-  const q = "UPDATE user SET Email = ? WHERE UserID = ?";
 
-  db.query(q, [email, userId], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err });
 
-    return res.json({ message: 'Email updated successfully' });
+
+// Aboubacar Starting point on the backend
+
+// Endpoint to get all items
+app.get('/items', (req, res) => {
+  const query = 'SELECT * FROM item';
+  db.query(query, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Endpoint to get all items with their highest bids
+app.get('/items-with-highest-bids', (req, res) => {
+  const query = `
+    SELECT 
+      i.*, 
+      (SELECT MAX(b.BidAmount) 
+       FROM Bid b 
+       WHERE b.ItemID = i.ItemID AND b.IsAccepted = 0) AS highest_bid
+    FROM Item i
+    WHERE i.IsRemoved = 0
+  `;
+  
+  db.query(query, (err, results) => {
+    if (err) throw err;
+    res.json(results);
   });
 });
 
 
-// Add Money route
-app.post('/add-money', authenticateToken, (req, res) => {
-  const userId = req.user.id;
-  const { amount } = req.body;
 
-  // Validate amount
-  if (amount <= 0) {
-    return res.status(400).json({ message: 'Invalid amount' });
+// Endpoint to place a bid
+app.post('/bids', (req, res) => {
+  const { item_id, bidder, amount, user_id} = req.body;
+
+  // Validate input
+  if (!item_id || !bidder || !amount || !user_id) {
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
-  // Update user's account balance
-  const q = "UPDATE user SET AccountBalance = AccountBalance + ? WHERE UserID = ?";
+  // Prepare the SQL query to insert a new bid
+  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount) VALUES (?, ?, ?)';
 
-  db.query(q, [amount, userId], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err });
+  // Execute the query
+  db.query(query, [item_id, bidder, amount], (err, result) => {
+    if (err) {
+      console.error(err); // Log the error
+      return res.status(500).json({ message: 'Error placing bid.' });
+    }
 
-    return res.json({ message: 'Account balance updated successfully' });
+    // Return success response with the generated BidID
+    res.json({ message: 'Bid placed successfully!', bidId: result.insertId });
   });
 });
+
+
+
+
+// Endpoint to get a specific item with all its bids
+app.get('/item/:itemId', (req, res) => {
+  const itemId = req.params.itemId;
+
+  const itemQuery = "SELECT * FROM item WHERE ItemID = ? AND IsRemoved = 0";
+
+  db.query(itemQuery, [itemId], (err, itemData) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    if (itemData.length === 0) return res.status(404).json({ message: 'Item not found or removed.' });
+
+    const bidsQuery = "SELECT * FROM Bid WHERE ItemID = ? ORDER BY BidDate DESC";
+
+    db.query(bidsQuery, [itemId], (err, bidsData) => {
+      if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+      res.json({
+        item: itemData[0],  // Send the item data
+        bids: bidsData,     // Send all bids for the item
+      });
+    });
+  });
+});
+
 
 
 //Connecting to backend, port number 8000
