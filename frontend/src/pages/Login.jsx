@@ -28,8 +28,17 @@ const Login = () => {
                 console.log('Login successful:', res.data);
                 // Store token in localStorage or context
                 localStorage.setItem('token', res.data.token);
+                localStorage.setItem('role', res.data.role);
                 // Redirect to dashboard or another page after successful login
-                navigate('/dashboard');
+                if(res.data.role === 'SuperUser')
+                {
+                    navigate('/dashboard');
+                }
+                else
+                {
+                    navigate('/user-home');
+                }
+                
             }
         } catch (err) {
             console.error('Login failed:', err.response ? err.response.data : err.message);
