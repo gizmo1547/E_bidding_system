@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-//import './UserHome.css'; // Import the CSS file for styling
+import './UserHome.css'; // Import the CSS file for styling
+import item from '../component/item';
 
 const UserHome = () => {
   const [userData, setUserData] = useState({});
@@ -128,7 +129,7 @@ const UserHome = () => {
             {items.length > 0 ? (
               items.map((item) => (
                 <div key={item.ItemID} className="item-card">
-                  <img src={item.ImageURL || 'placeholder-image.jpg'} alt={item.Title} />
+                  <img src= '/images/airpods.jpg' alt={item.Title} />
                   <h4>{item.Title}</h4>
                   <p>{item.Description}</p>
                   <p>Price: ${item.AskingPrice}</p>
