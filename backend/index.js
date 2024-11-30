@@ -6,6 +6,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
+
+
+//const db = require('./db'); // Assuming you have a db.js for MySQL connection
 const app = express()
 //Connecting to data base
 const db = mysql.createConnection({
@@ -90,7 +93,145 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+//superUser verify
+const verifySuperUser = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  // Verify token and extract user info (assuming JWT is used)
+  jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+    if (err) return res.status(401).json({ message: 'Unauthorized' });
+    if (decoded.role !== 'SuperUser') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+//superUser verify
+app.get('/admin/users', verifySuperUser, (req, res) => {
+  const q = `
+    SELECT UserID, Username, Email, Role, IsActive, IsSuspended, SuspensionCount, RegistrationDate
+    FROM User
+    WHERE Role != 'SuperUser'
+  `;
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json(err);
+    res.json(data);
+  });
+});
+//Suspended
+app.put('/admin/users/:id/suspend', verifySuperUser, (req, res) => {
+  const userId = req.params.id;
+  const { action } = req.body; // 'suspend' or 'activate'
 
+  let q;
+  if (action === 'suspend') {
+    q = `
+      UPDATE User SET IsSuspended = TRUE, SuspensionCount = SuspensionCount + 1
+      WHERE UserID = ?
+    `;
+  } else if (action === 'activate') {
+    q = `
+      UPDATE User SET IsSuspended = FALSE
+      WHERE UserID = ?
+    `;
+  } else {
+    return res.status(400).json({ message: 'Invalid action' });
+  }
+
+  db.query(q, [userId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: 'User updated successfully' });
+  });
+});
+
+
+
+//Items super user
+app.get('/admin/items', verifySuperUser, (req, res) => {
+  const q = `
+    SELECT ItemID, Title, Description, AskingPrice, ListingType, Status, ListingDate, Deadline, IsRemoved
+    FROM Item
+  `;
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json(err);
+    res.json(data);
+  });
+});
+
+//Superuser remove
+app.put('/admin/items/:id/remove', verifySuperUser, (req, res) => {
+  const itemId = req.params.id;
+
+  const q = `
+    UPDATE Item SET IsRemoved = TRUE
+    WHERE ItemID = ?
+  `;
+
+  db.query(q, [itemId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: 'Item removed successfully' });
+  });
+});
+//super user complaints
+app.get('/admin/complaints', verifySuperUser, (req, res) => {
+  const q = `
+    SELECT c.ComplaintID, c.Content, c.ComplaintDate, c.IsResolved, u.Username AS Complainant, a.Username AS AgainstUser
+    FROM Complaint c
+    JOIN User u ON c.ComplainantID = u.UserID
+    JOIN User a ON c.AgainstUserID = a.UserID
+    WHERE c.IsResolved = FALSE
+  `;
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json(err);
+    res.json(data);
+  });
+});
+//rsolve complaints
+app.put('/admin/complaints/:id/resolve', verifySuperUser, (req, res) => {
+  const complaintId = req.params.id;
+  const resolvedBy = req.user.UserID; // Assuming req.user is set by verifySuperUser
+
+  const q = `
+    UPDATE Complaint SET IsResolved = TRUE, ResolvedBy = ?, ResolutionDate = NOW()
+    WHERE ComplaintID = ?
+  `;
+
+  db.query(q, [resolvedBy, complaintId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: 'Complaint resolved successfully' });
+  });
+});
+
+
+//Applications
+app.get('/admin/applications', verifySuperUser, (req, res) => {
+  const q = `
+    SELECT a.ApplicationID, a.ArithmeticQuestion, a.ProvidedAnswer, a.IsApproved, u.Username AS VisitorUsername
+    FROM Application a
+    JOIN User u ON a.VisitorID = u.UserID
+    WHERE a.IsApproved = FALSE
+  `;
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json(err);
+    res.json(data);
+  });
+});
+
+//Approved
+app.put('/admin/applications/:id/approve', verifySuperUser, (req, res) => {
+  const applicationId = req.params.id;
+  const approvedBy = req.user.UserID;
+
+  const q = `
+    UPDATE Application SET IsApproved = TRUE, ApprovedBy = ?, ApprovalDate = NOW()
+    WHERE ApplicationID = ?
+  `;
+
+  db.query(q, [approvedBy, applicationId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: 'Application approved successfully' });
+  });
+});
 
 
 // Registration route
