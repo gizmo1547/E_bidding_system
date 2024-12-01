@@ -362,6 +362,14 @@ app.get("/items", (req, res) => {
   });
 });
 
+//Categores
+app.get("/categories", (req, res) => {
+  const q = "SELECT CategoryID, CategoryName, CategoryDescription FROM Categories";
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json({ message: "Database error", error: err });
+    return res.json(data);
+  });
+});
 
 
 //Connecting to backend, port number 8000
