@@ -186,3 +186,28 @@ ALTER TABLE User MODIFY Role ENUM('Visitor', 'User', 'SuperUser') NOT NULL DEFAU
 --Manually insert a super user into your database
 INSERT INTO User (Username, Password, Email, Role, IsActive, RegistrationDate)
 VALUES ('admin', '$2b$10$Vj8DbhGWmRcA2DNIPtJHR.rqHUs0WDdo3WBDEz1pxPdTJlPl//GF6', 'admin@example.com', 'SuperUser', 1, NOW());
+
+--SQL Script to Create imgSrc Table
+CREATE TABLE IF NOT EXISTS imgSrc (
+    imgID INT AUTO_INCREMENT PRIMARY KEY,
+    ItemID INT NOT NULL,
+    imgURL VARCHAR(255) NOT NULL,
+    IsPrimary BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- Create Categories Table
+CREATE TABLE IF NOT EXISTS Categories (
+    CategoryID INT AUTO_INCREMENT PRIMARY KEY,
+    CategoryName VARCHAR(100) NOT NULL UNIQUE,
+    CategoryDescription TEXT
+);
+
+--Modify Item Table to Include CategoryID
+ALTER TABLE Item
+ADD COLUMN CategoryID INT,
+ADD FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
