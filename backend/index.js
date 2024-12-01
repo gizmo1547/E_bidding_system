@@ -370,7 +370,7 @@ app.get("/categories", (req, res) => {
     return res.json(data);
   });
 });
-
+/*
 // Fetch all items (Edison Florian)
 app.get("/items", (req, res) => {
   const q = "SELECT Title,imgSrc,Description,AskingPrice FROM item";
@@ -379,7 +379,7 @@ app.get("/items", (req, res) => {
     return res.json(data);
   });
 });
-
+*/
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
