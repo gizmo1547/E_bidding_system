@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 
 
 
-//const db = require('./db'); // Assuming you have a db.js for MySQL connection
+
 const app = express()
 //Connecting to data base
 const db = mysql.createConnection({
@@ -106,7 +106,7 @@ const verifySuperUser = (req, res, next) => {
     next();
   });
 };
-//superUser verify
+//superUser 
 app.get('/admin/users', verifySuperUser, (req, res) => {
   const q = `
     SELECT UserID, Username, Email, Role, IsActive, IsSuspended, SuspensionCount, RegistrationDate
@@ -314,7 +314,7 @@ app.post('/login', async (req, res) => {
       res.json({ message: 'Login successful', token, role: user.Role });
     } else {
       // If the password doesn't match, respond with an error
-      res.status(401).json({ message: 'Invalid credentials' });
+      res.status(401).json({ message: 'Invalid credentials' });//google if you have this error
     }
   });
 });
@@ -353,12 +353,22 @@ app.post('/add-money', authenticateToken, (req, res) => {
     return res.json({ message: 'Account balance updated successfully' });
   });
 });
+// Fetch all items (Edison Florian)
+app.get("/items", (req, res) => {
+  const q = "SELECT Title,Description,AskingPrice FROM item";
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json({ message: "Database error", error: err });
+    return res.json(data);
+  });
+});
+
 
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
     console.log("Connected to backend!")
 })
+    
 /*
 // index.js
 import express from "express";
