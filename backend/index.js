@@ -363,6 +363,15 @@ app.get("/items", (req, res) => {
 });
 
 
+// Fetch all items (Edison Florian)
+app.get("/items", (req, res) => {
+  const q = "SELECT Title,imgSrc,Description,AskingPrice FROM item";
+  db.query(q, (err, data) => {
+    if (err) return res.status(500).json({ message: "Database error", error: err });
+    return res.json(data);
+  });
+});
+
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
