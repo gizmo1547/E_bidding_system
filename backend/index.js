@@ -14,8 +14,8 @@ const app = express()
 const db = mysql.createConnection({
    host:"localhost",//change if need it
    user:"root",//change if need it
-   password:"GermanVoronovich",//change to your password
-   database:"e_bidding_system"
+   password:"Juninho99@",//change to your password
+   database:"Biding_project"
 })
 
 
@@ -380,6 +380,82 @@ app.get("/items", (req, res) => {
   });
 });
 */
+
+
+
+
+
+// Endpoint to get all items with their highest bids
+app.get('/items-with-highest-bids', (req, res) => {
+  const query = `
+    SELECT 
+      i.*, 
+      (SELECT MAX(b.BidAmount) 
+       FROM Bid b 
+       WHERE b.ItemID = i.ItemID AND b.sAccepted = 0) AS highest_bid
+    FROM Item i
+    WHERE i.IsRemoved = 0
+  `;
+  
+  db.query(query, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+
+
+// Endpoint to place a bid
+app.post('/bids', (req, res) => {
+  const { item_id, bidder, amount, user_id} = req.body;
+
+  // Validate input
+  if (!item_id || !bidder || !amount || !user_id) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+
+  // Prepare the SQL query to insert a new bid
+  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount) VALUES (?, ?, ?)';
+
+  // Execute the query
+  db.query(query, [item_id, bidder, amount], (err, result) => {
+    if (err) {
+      console.error(err); // Log the error
+      return res.status(500).json({ message: 'Error placing bid.' });
+    }
+
+    // Return success response with the generated BidID
+    res.json({ message: 'Bid placed successfully!', bidId: result.insertId });
+  });
+});
+
+
+
+
+// Endpoint to get a specific item with all its bids
+app.get('/item/:itemId', (req, res) => {
+  const itemId = req.params.itemId;
+
+  const itemQuery = "SELECT * FROM item WHERE ItemID = ? AND IsRemoved = 0";
+
+  db.query(itemQuery, [itemId], (err, itemData) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    if (itemData.length === 0) return res.status(404).json({ message: 'Item not found or removed.' });
+
+    const bidsQuery = "SELECT * FROM Bid WHERE ItemID = ? ORDER BY BidDate DESC";
+
+    db.query(bidsQuery, [itemId], (err, bidsData) => {
+      if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+      res.json({
+        item: itemData[0],  // Send the item data
+        bids: bidsData,     // Send all bids for the item
+      });
+    });
+  });
+});
+
+
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{

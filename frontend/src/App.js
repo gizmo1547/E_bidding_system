@@ -16,6 +16,9 @@ import AddMoney from './pages/AddMoney'; // New component
 import AccountManager from './pages/AccountManager'; // New component
 import AdminRoute from './pages/AdminRoute'; // New component
 
+import ItemList from './pages/ItemList'; // Import ItemList component
+import ItemDetails from './pages/ItemDetails'; // Import ItemDetails component
+
 function App()
 {
   return (
@@ -33,7 +36,8 @@ function App()
         <Route path="/add-money" element={<PrivateRoute><AddMoney/></PrivateRoute>} />
         <Route path="/user-home" element={<PrivateRoute><UserHome/></PrivateRoute>} />
         <Route path="/account-manager" element={<PrivateRoute><AccountManager/></PrivateRoute>} />
-        
+        <Route path="/ItemList" element={<ItemList />} />
+        <Route path="/item/:itemId" element={<ItemDetails />} />
        </Routes>
       
       </BrowserRouter>
