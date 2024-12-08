@@ -1,64 +1,64 @@
 /* Container for the entire card */
 .item-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    width: 300px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 15px;
-    cursor: pointer;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 300px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 15px;
+  cursor: pointer;
+}
+
+/* Image styling */
+.item-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+/* Title styling */
+.item-card h3 {
+  font-size: 18px;
+  margin: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Description styling */
+.item-card p {
+  font-size: 14px;
+  margin: 0 15px 15px;
+  color: #777;
+  line-height: 1.4;
+}
+
+/* Hover effects */
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Lazy loading image effects */
+.item-card .lazy-load {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.item-card img.lazy-load.loaded {
+  opacity: 1;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .item-card {
+    width: 250px;
   }
-  
-  /* Image styling */
-  .item-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: opacity 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .item-card {
+    width: 200px;
   }
-  
-  /* Title styling */
-  .item-card h3 {
-    font-size: 18px;
-    margin: 15px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  /* Description styling */
-  .item-card p {
-    font-size: 14px;
-    margin: 0 15px 15px;
-    color: #777;
-    line-height: 1.4;
-  }
-  
-  /* Hover effects */
-  .item-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Lazy loading image effects */
-  .item-card .lazy-load {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .item-card img.lazy-load.loaded {
-    opacity: 1;
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .item-card {
-      width: 250px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .item-card {
-      width: 200px;
-    }
-  }
+}

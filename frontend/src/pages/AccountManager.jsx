@@ -67,10 +67,63 @@ const AccountManager = () => {
         <button type="submit">Update Email</button>
       </form>
       {message && <p>{message}</p>}
+      <div>
+          <label>First Name:</label>
+          <input
+            type="text"
+          />
+        </div>
+      <div>
+          <label>Last Name:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Address:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Country:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>State:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>City:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Zip Code:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Address 2:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Phone Number:</label>
+          <input
+            type="text"
+          />
+        </div>
+        <button type="Submit">Edit Shipping Address</button>
     </div>
   );
 };
 
 export default AccountManager;
-
-

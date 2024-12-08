@@ -1,0 +1,265 @@
+/* ItemDetail.css */
+
+/* General styles */
+/*
+.item-detail-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .item-header {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .item-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .item-description {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 15px;
+  }
+  
+  .item-starting-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  .bids-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .bids-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .bid-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .bid-item:last-child {
+    border-bottom: none;
+  }
+  
+  .bid-item p {
+    margin: 5px 0;
+  }
+  
+  .bid-status {
+    font-weight: bold;
+  }
+  
+  .accepted {
+    color: green;
+  }
+  
+  .not-accepted {
+    color: red;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #555;
+  }
+  
+ 
+  form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  form button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  form button:hover {
+    background-color: #0056b3;
+  }
+  */
+
+  /* General styles for the ItemDetails container */
+.item-details-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Adds space between the two components */
+    margin: 20px;
+  }
+  
+  /* Style for the item details section */
+  .item-details {
+    flex: 1; /* Ensures it takes up the remaining space */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: 60%; /* Makes sure it's not too wide */
+  }
+  
+  .item-details img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  
+  .item-details h1 {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .item-details h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .item-details p {
+    font-size: 1rem;
+    color: #555;
+    margin: 10px 0;
+  }
+  
+  .item-details ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .item-details li {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+  }
+  
+  /* PlaceB component container */
+  .placebid-section-container {
+    flex: 1; /* Ensures it takes up the remaining space */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: 35%; /* Makes sure it's not too wide */
+  }
+  
+  /* Style for the PlaceB form (same as the previous CSS you provided) */
+  .placebid-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .placebid-section h3 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .placebid-section label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .placebid-section input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .placebid-section input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  .placebid-section button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .placebid-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .placebid-section .success {
+    color: green;
+  }
+  
+  .placebid-section .error {
+    color: red;
+  }
+  
+  /* Responsive design for smaller screens */
+  @media (max-width: 768px) {
+    .item-details-container {
+      flex-direction: column; /* Stack the components vertically */
+    }
+  
+    .item-details {
+      max-width: 100%;
+    }
+  
+    .placebid-section-container {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .placebid-section-container {
+      max-width: 100%;
+    }
+  }
+  

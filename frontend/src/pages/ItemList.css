@@ -1,0 +1,128 @@
+.item-list {
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    background-color: #f4f7fa;
+    min-height: 100vh;
+  }
+  
+  /* Heading Styles */
+  h2 {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 40px;
+  }
+  
+  /* Flexbox Grid for Items */
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 20px; /* Spacing between items */
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Styling for Each Item */
+  li {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  /* Hover Effect for Each Item */
+  li:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Link Styling */
+  a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Hover effect on the Link */
+  a:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Item Image Styling */
+  .item-image {
+    width: 100%;
+    height: auto;
+    max-width: 240px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  /* Item Title Styling */
+  h3 {
+    color: #34495e;
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  
+  /* Item Price Styling */
+  p {
+    color: #7f8c8d;
+    font-size: 1rem;
+    margin: 5px 0;
+  }
+  
+  /* Starting Price Styling */
+  .item-price {
+    font-weight: bold;
+    color: #2980b9; /* Blue for Starting Price */
+  }
+  
+  /* Highest Bid Styling */
+  .item-highest-bid {
+    color: #27ae60;  /* Green color for Highest Bid */
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  /* No Bid yet message */
+  .no-bid {
+    color: #e74c3c;  /* Red color for No bids yet */
+    font-weight: bold;
+  }
+  
+  /* Responsive Design for Smaller Screens */
+  @media (max-width: 768px) {
+    h2 {
+      font-size: 1.8rem;
+    }
+  
+    li {
+      padding: 10px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h2 {
+      font-size: 1.5rem;
+    }
+  
+    .item-image {
+      max-width: 180px;
+    }
+  }
+  
