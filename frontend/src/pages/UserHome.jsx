@@ -160,6 +160,9 @@ const UserHome = () => {
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [message, setMessage] = useState(''); // For error handling
+  const [chatMessages, setChatMessages] = useState([]); // Add chat state
+  const [userInput, setUserInput] = useState(''); // For the chat text input
+
   const navigate = useNavigate();
 
   // Function to fetch categories from the backend
@@ -241,6 +244,26 @@ const UserHome = () => {
     setSelectedCategory(category === 'More' ? null : category);
   };
 
+  // Complete handleSendMessage function
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+
+    const newUserMessage = { sender: 'user', text: userInput.trim() };
+    setChatMessages((prev) => [...prev, newUserMessage]);
+    setUserInput('');
+
+    try {
+      const res = await axios.post('http://localhost:8000/bot', { message: userInput.trim() });
+      const botReply = { sender: 'bot', text: res.data.reply };
+      setChatMessages((prev) => [...prev, botReply]);
+    } catch (error) {
+      console.error('Error chatting with bot:', error);
+      const botReply = { sender: 'bot', text: 'Sorry, something went wrong.' };
+      setChatMessages((prev) => [...prev, botReply]);
+    }
+  };
+
   return (
     <div className="user-home-container">
       <header>
@@ -280,6 +303,26 @@ const UserHome = () => {
              <ItemList /> {/* This will render your ItemList component */}
         </section>
       </div>
+          {/* Chat UI */}
+      <div className="chat-container">
+        <div className="chat-messages">
+          {chatMessages.map((msg, i) => (
+            <div key={i} className={`chat-message ${msg.sender}`}>
+              <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
+            </div>
+          ))}
+        </div>
+        <form onSubmit={handleSendMessage} className="chat-input-form">
+          <input
+            type="text"
+            placeholder="Ask me something..."
+            value={userInput}
+            onChange={e => setUserInput(e.target.value)}
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+
     </div>
   );
 };

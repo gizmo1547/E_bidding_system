@@ -399,6 +399,25 @@ app.get('/items-with-highest-bids', (req, res) => {
   });
 });
 
+// Simple bot endpoint
+app.post('/bot', (req, res) => {
+  const userMessage = req.body.message;
+  
+  // Basic logic: respond differently based on user query
+  let reply = "I'm here to help! You asked: " + userMessage;
+
+  // Example: If user mentions "categories"
+  if (userMessage.toLowerCase().includes("categories")) {
+    reply = "Our categories are: " + ["Electronics", "Books", "Art"].join(", ");
+  }
+
+  // If user mentions "help"
+  if (userMessage.toLowerCase().includes("help")) {
+    reply = "Sure, I can help. Ask me about categories, items, or your account.";
+  }
+
+  res.json({ reply });
+});
 
 
 // Endpoint to place a bid
