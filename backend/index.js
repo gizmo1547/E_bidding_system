@@ -398,8 +398,114 @@ app.get('/items-with-highest-bids', (req, res) => {
     res.json(results);
   });
 });
+// bot endpoint
+// Improved bot endpoint with dynamic responses and personalization
+app.post('/bot', authenticateToken, async (req, res) => {
+  const userMessage = req.body.message.trim().toLowerCase();
+  
+  // Helper function to fetch categories from the DB
+  const getCategoriesFromDB = () => {
+    return new Promise((resolve, reject) => {
+      const q = "SELECT CategoryName FROM Categories";
+      db.query(q, (err, data) => {
+        if (err) return reject(err);
+        const categoryNames = data.map(row => row.CategoryName);
+        resolve(categoryNames);
+      });
+    });
+  };
 
-// Simple bot endpoint
+  // Helper function to fetch user balance if logged in
+  const getUserBalance = (userId) => {
+    return new Promise((resolve, reject) => {
+      const q = "SELECT AccountBalance FROM user WHERE UserID = ?";
+      db.query(q, [userId], (err, data) => {
+        if (err) return reject(err);
+        if (data.length === 0) return resolve(null);
+        resolve(data[0].AccountBalance);
+      });
+    });
+  };
+
+  // Helper function to fetch items by category
+  const getItemsByCategory = (category) => {
+    return new Promise((resolve, reject) => {
+      const q = "SELECT Title, AskingPrice FROM item WHERE Category = ? AND IsRemoved = 0 LIMIT 5";
+      db.query(q, [category], (err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+  };
+
+  let reply = "I’m here to assist you. Try asking for help to see what I can do.";
+
+  try {
+    // Handle help command
+    if (userMessage.includes("help")) {
+      reply = `
+I can help you with:
+
+- "Show me categories"
+- "Show me items in [category]"
+- "What's my balance?"
+- "help" to see this message again
+      `.trim();
+    }
+
+    // Handle categories command
+    else if (userMessage.includes("categories")) {
+      const categories = await getCategoriesFromDB();
+      if (categories.length > 0) {
+        reply = "Our available categories are: " + categories.join(", ");
+      } else {
+        reply = "No categories found at the moment.";
+      }
+    }
+
+    // Handle balance command (requires authenticated user)
+    else if (userMessage.includes("balance")) {
+      if (req.user && req.user.id) {
+        const balance = await getUserBalance(req.user.id);
+        if (balance !== null) {
+          reply = `Your current balance is $${balance.toFixed(2)}`;
+        } else {
+          reply = "I couldn’t find your balance. Please make sure you’re logged in.";
+        }
+      } else {
+        reply = "Please log in to view your balance.";
+      }
+    }
+
+    // Handle items by category: "items in electronics"
+    else if (userMessage.includes("items in")) {
+      const words = userMessage.split(" ");
+      const categoryIndex = words.indexOf("in") + 1;
+      if (categoryIndex > 0 && categoryIndex < words.length) {
+        const categoryName = words.slice(categoryIndex).join(" ");
+        const items = await getItemsByCategory(categoryName);
+        if (items.length > 0) {
+          reply = `Top items in ${categoryName}:\n` + items.map(i => `${i.Title} - $${i.AskingPrice.toFixed(2)}`).join("\n");
+        } else {
+          reply = `No items found in category: ${categoryName}.`;
+        }
+      } else {
+        reply = "Please specify a category, e.g. 'items in electronics'.";
+      }
+    }
+    
+    // Default response if none of the conditions match
+    else {
+      reply = "I’m here to help! Try asking for 'help' to see what I can do.";
+    }
+
+    return res.json({ reply });
+  } catch (error) {
+    console.error("Error in bot endpoint:", error);
+    return res.status(500).json({ reply: "Oops! Something went wrong on my end." });
+  }
+});
+/*
 app.post('/bot', (req, res) => {
   const userMessage = req.body.message;
   
@@ -419,7 +525,7 @@ app.post('/bot', (req, res) => {
   res.json({ reply });
 });
 
-
+*/
 // Endpoint to place a bid
 app.post('/bids', (req, res) => {
   const { item_id, bidder, amount, user_id} = req.body;

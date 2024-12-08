@@ -1,34 +1,36 @@
-/*import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './UserHome.css'; // Import the CSS file for styling
+import './UserHome.css'; 
+import ItemList from './ItemList';
 
 const UserHome = () => {
   const [userData, setUserData] = useState({});
-  const [categories, setCategories] = useState([]); // Replace static categories with dynamic state
+  const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [message, setMessage] = useState(''); // For error handling
+  const [message, setMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState('');
+  const [isChatMinimized, setIsChatMinimized] = useState(false); // New state
+
   const navigate = useNavigate();
 
-  // Function to fetch categories from the backend
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:8000/categories'); // Backend endpoint for categories
-      const categoryNames = res.data.map((category) => category.CategoryName); // Extract category names
-      setCategories(categoryNames); // Update the state
+      const res = await axios.get('http://localhost:8000/categories');
+      const categoryNames = res.data.map((category) => category.CategoryName);
+      setCategories(categoryNames);
     } catch (error) {
       console.error('Error fetching categories:', error);
       setMessage('Failed to load categories. Please try again.');
     }
   }, []);
 
-  // Function to fetch user data from the backend
   const fetchUserData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        // If no token, redirect to login
         navigate('/login');
         return;
       }
@@ -44,12 +46,11 @@ const UserHome = () => {
       console.error('Error fetching user data:', error);
       setMessage('Failed to load user data. Please try again.');
       if (error.response && error.response.status === 401) {
-        navigate('/login'); // Redirect to login if unauthorized
+        navigate('/login');
       }
     }
   }, [navigate]);
 
-  // Function to fetch items from the backend
   const fetchItems = useCallback(async () => {
     try {
       const res = await axios.get('http://localhost:8000/items', {
@@ -63,31 +64,55 @@ const UserHome = () => {
   }, [selectedCategory]);
 
   useEffect(() => {
-    fetchCategories(); // Fetch categories from the backend
-    fetchUserData(); // Fetch user data from the backend
-    fetchItems(); // Fetch items based on selected category
+    fetchCategories();
+    fetchUserData();
+    fetchItems();
   }, [fetchCategories, fetchUserData, fetchItems]);
 
-  // Function to handle logout
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     navigate('/login');
   };
 
-  // Function to navigate to add money page
   const handleAddMoney = () => {
     navigate('/add-money');
   };
 
-  // Function to navigate to account manager page
   const handleAccountManager = () => {
     navigate('/account-manager');
   };
 
-  // Function to handle category selection
   const handleCategoryClick = (category) => {
     setSelectedCategory(category === 'More' ? null : category);
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+
+    const newUserMessage = { sender: 'user', text: userInput.trim() };
+    setChatMessages((prev) => [...prev, newUserMessage]);
+    setUserInput('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        'http://localhost:8000/bot',
+        { message: userInput.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const botReply = { sender: 'bot', text: res.data.reply };
+      setChatMessages((prev) => [...prev, botReply]);
+    } catch (error) {
+      console.error('Error chatting with bot:', error);
+      const botReply = { sender: 'bot', text: 'Sorry, something went wrong.' };
+      setChatMessages((prev) => [...prev, botReply]);
+    }
   };
 
   return (
@@ -125,29 +150,50 @@ const UserHome = () => {
 
         <section className="items-section">
           <h3>{selectedCategory || 'All'} Items</h3>
-          <div className="items-container">
-            {items.length > 0 ? (
-              items.map((item) => (
-                <div key={item.ItemID} className="item-card">
-                  <img src="/images/airpods.jpg" alt={item.Title} />
-                  <h4>{item.Title}</h4>
-                  <p>{item.Description}</p>
-                  <p>Price: ${item.AskingPrice}</p>
-                  <p>Deadline: {new Date(item.Deadline).toLocaleDateString()}</p>
-                </div>
-              ))
-            ) : (
-              <p>No items found.</p>
-            )}
-          </div>
+          <ItemList items={items} />
         </section>
+      </div>
+
+      {/* Chat UI */}
+      <div className={`chat-container ${isChatMinimized ? 'minimized' : ''}`}>
+        <div className="chat-header">
+          <span>Chat Assistant</span>
+          <button 
+            className="chat-toggle-btn" 
+            onClick={() => setIsChatMinimized(!isChatMinimized)}
+          >
+            {isChatMinimized ? '▲' : '▼'}
+          </button>
+        </div>
+
+        {!isChatMinimized && (
+          <>
+            <div className="chat-messages">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`chat-message ${msg.sender}`}>
+                  <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="chat-input-form">
+              <input
+                type="text"
+                placeholder="Ask me something..."
+                value={userInput}
+                onChange={e => setUserInput(e.target.value)}
+              />
+              <button type="submit">Send</button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
 export default UserHome;
-*/
+
+/*
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -243,6 +289,8 @@ const UserHome = () => {
   const handleCategoryClick = (category) => {
     setSelectedCategory(category === 'More' ? null : category);
   };
+ 
+
 
   // Complete handleSendMessage function
   const handleSendMessage = async (e) => {
@@ -254,7 +302,17 @@ const UserHome = () => {
     setUserInput('');
 
     try {
-      const res = await axios.post('http://localhost:8000/bot', { message: userInput.trim() });
+      const token = localStorage.getItem('token');
+
+      const res = await axios.post(
+        'http://localhost:8000/bot', 
+        { message: userInput.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
       const botReply = { sender: 'bot', text: res.data.reply };
       setChatMessages((prev) => [...prev, botReply]);
     } catch (error) {
@@ -299,11 +357,12 @@ const UserHome = () => {
 
         <section className="items-section">
           <h3>{selectedCategory || 'All'} Items</h3>
-             {/* Embed ItemList as a section */}
-             <ItemList /> {/* This will render your ItemList component */}
+             {/* Embed ItemList as a section *///}
+             //<ItemList /> {/* This will render your ItemList component */}
+             /*
         </section>
       </div>
-          {/* Chat UI */}
+          
       <div className="chat-container">
         <div className="chat-messages">
           {chatMessages.map((msg, i) => (
@@ -328,7 +387,7 @@ const UserHome = () => {
 };
 
 export default UserHome;
-
+*/
 
 
 
