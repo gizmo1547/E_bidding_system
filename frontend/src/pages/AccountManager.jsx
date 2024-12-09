@@ -7,6 +7,15 @@ const AccountManager = () => {
   const [userData, setUserData] = useState({});
   const [newEmail, setNewEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [newFirst, setFirst] = useState('');
+  const [newLast, setLast] = useState('');
+  const [newAddress, setAddress] = useState('');
+  const [newZip, setZip] = useState('');
+  const [newCity, setCity] = useState('');
+  const [newState, setState] = useState('');
+  const [newCountry, setCountry] = useState('');
+  const [newPhoneNumber, setPhoneNumber] = useState('');
+
 
   // Fetch user data
   useEffect(() => {
@@ -46,7 +55,25 @@ const AccountManager = () => {
       setMessage(error.response?.data?.message || 'Failed to update email');
     }
   };
-
+  const handleDetails = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post('http://localhost:8000/update-address', { firstName: newFirst, lastName: newLast, address: newAddress, zip: newZip, city: newCity, state: newState, country: newCountry, phoneNumber: newPhoneNumber }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.status === 200) {
+        setMessage('Details updated successfully!');
+        setUserData({ ...userData, First: newFirst, Last: newLast, Address: newAddress, Zip: newZip, City: newCity, State: newState, country: newCountry, PhoneNumber: newPhoneNumber});
+      }
+    } catch (error) {
+      console.error('Error updating Details:', error);
+      setMessage(error.response?.data?.message || 'Failed to update Details');
+    }
+  };
   return (
     <div className="account-manager-container">
       <h2>Account Manager</h2>
@@ -67,61 +94,82 @@ const AccountManager = () => {
         <button type="submit">Update Email</button>
       </form>
       {message && <p>{message}</p>}
-      <div>
-          <label>First Name:</label>
+      <form onSubmit={handleDetails}>
+        <div>
+          <label>FirstName:</label>
           <input
-            type="text"
+            type="firstName"
+            value={newFirst}
+            onChange={(e) => setFirst(e.target.value)}
+            required
           />
         </div>
-      <div>
-          <label>Last Name:</label>
+        <div>
+          <label>LastName:</label>
           <input
-            type="text"
+            type="lastName"
+            value={newLast}
+            onChange={(e) => setLast(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Address:</label>
           <input
-            type="text"
-          />
-        </div>
-        <div>
-          <label>Country:</label>
-          <input
-            type="text"
-          />
-        </div>
-        <div>
-          <label>State:</label>
-          <input
-            type="text"
-          />
-        </div>
-        <div>
-          <label>City:</label>
-          <input
-            type="text"
+            type="address"
+            value={newAddress}
+            onChange={(e) => setAddress(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Zip Code:</label>
           <input
-            type="text"
+            type="zipCode"
+            value={newZip}
+            onChange={(e) => setZip(e.target.value)}
+            required
           />
         </div>
         <div>
-          <label>Address 2:</label>
+          <label>City:</label>
           <input
-            type="text"
+            type="city"
+            value={newCity}
+            onChange={(e) => setCity(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>State:</label>
+          <input
+            type="state"
+            value={newState}
+            onChange={(e) => setState(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Country:</label>
+          <input
+            type="country"
+            value={newCountry}
+            onChange={(e) => setCountry(e.target.value)}
+            required
           />
         </div>
         <div>
           <label>Phone Number:</label>
           <input
-            type="text"
+            type="phoneNumber"
+            value={newPhoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            required
           />
         </div>
-        <button type="Submit">Edit Shipping Address</button>
+        <button type="submit">Update Details</button>
+      </form>
+      <button type="submit">Sell Item</button>
     </div>
   );
 };
