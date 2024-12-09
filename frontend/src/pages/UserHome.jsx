@@ -98,8 +98,7 @@ const UserHome = () => {
         <h1>E-Bidding Store</h1>
         <div className="user-info">
           <span>Welcome, {userData.Username}!</span>
-          <span>Balance: ${userData.AccountBalance?.toFixed(2) || '0.00'}</span>
-          <button onClick={handleAddMoney}>Add Money</button>
+          <button onClick={handleAddMoney}>Handle Money</button>
           <button onClick={handleAccountManager}>Account Manager</button>
           <button className="logout-button" onClick={handleLogout}>
             Logout
