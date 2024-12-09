@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-//import './AddMoney.css';
+import './AddMoney.css';
 
 const AddMoney = () => {
   const [amountDeposit, setAmountDeposit] = useState('');

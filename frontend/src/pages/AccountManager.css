@@ -1,0 +1,225 @@
+/* Main Container */
+.account-manager-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* To position the button within this container */
+  }
+  
+  /* Page Heading */
+  .account-manager-container h2 {
+    font-size: 24px;
+    text-align: center;
+    color: #478a33;
+    margin-bottom: 20px;
+  }
+  
+  /* Sell Item Button Container */
+  .sell-item-btn-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  
+  /* Sell Item Button */
+  .sell-item-btn {
+    padding: 15px 30px; /* Bigger button */
+    font-size: 18px; /* Bigger text */
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .sell-item-btn:hover {
+    background-color: #3a6b28;
+    transform: scale(1.05); /* Slight zoom effect */
+  }
+  
+  /* Form Styles */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  form div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  form input:focus {
+    border-color: #478a33;
+  }
+  
+  /* Form Button */
+  form button {
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #478a33;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  form button:hover {
+    background-color: #3a6b28;
+  }
+  
+  /* Success and Error Messages */
+  p {
+    color: #478a33;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  p.error {
+    color: red;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .account-manager-container {
+      padding: 15px;
+    }
+  
+    .sell-item-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  
+    form button {
+      font-size: 14px;
+    }
+  }
+  
+  
+
+/*
+
+.account-manager-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+ 
+  .account-manager-container h2 {
+    font-size: 24px;
+    text-align: center;
+    color: #478a33;
+    margin-bottom: 20px;
+  }
+  
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  form div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  form input:focus {
+    border-color: #478a33;
+  }
+  
+ 
+  form button, .account-manager-container button {
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #478a33;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  form button:hover, .account-manager-container button:hover {
+    background-color: #3a6b28;
+  }
+  
+  .account-manager-container button {
+    align-self: center;
+    margin-top: 10px;
+  }
+  
+
+  p {
+    color: #478a33;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  
+  p.error {
+    color: red;
+  }
+  
+
+  @media (max-width: 768px) {
+    .account-manager-container {
+      padding: 15px;
+    }
+  
+    form button, .account-manager-container button {
+      font-size: 14px;
+    }
+  }
+  */

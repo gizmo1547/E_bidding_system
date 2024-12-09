@@ -1,0 +1,97 @@
+/* Main Container */
+.add-money-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Page Heading */
+  .add-money-container h2 {
+    text-align: center;
+    color: #478a33;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  /* Form Styles */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  form div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  form label {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  form input:focus {
+    border-color: #478a33;
+  }
+  
+  /* Buttons */
+  form button {
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #478a33;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  form button:hover {
+    background-color: #3a6b28;
+    transform: scale(1.05);
+  }
+  
+  /* Message Styles */
+  p {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #478a33;
+  }
+  
+  p.error {
+    color: red;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .add-money-container {
+      padding: 15px;
+    }
+  
+    form button {
+      font-size: 14px;
+      padding: 10px;
+    }
+  
+    form input {
+      font-size: 14px;
+    }
+  }
+  
