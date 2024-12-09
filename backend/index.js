@@ -1,6 +1,6 @@
 //index.js
 import express from "express"
-import mysql from "mysql"
+import mysql from "mysql2"
 import cors from "cors"
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -14,8 +14,8 @@ const app = express()
 const db = mysql.createConnection({
    host:"localhost",//change if need it
    user:"root",//change if need it
-   password:"GermanVoronovich",//change to your password
-   database:"e_bidding_system"
+   password:"Awque12345@@",//change to your password
+   database:"e_bidding"
 })
 
 
@@ -333,21 +333,52 @@ app.post('/update-email', authenticateToken, (req, res) => {
   });
 });
 
+app.post('/update-address', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { firstName, lastName, address, zip, city, state, country, phoneNumber } = req.body;
+
+  const q = "UPDATE user SET FirstName = ?, Lastname = ?, Address = ?, ZipCode = ?, City = ?, State = ?, Country = ?, PhoneNumber = ? WHERE UserID = ?";
+
+  db.query(q, [firstName, lastName, address, zip, city, state, country, phoneNumber, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Email updated successfully' });
+  });
+});
 
 // Add Money route
 app.post('/add-money', authenticateToken, (req, res) => {
   const userId = req.user.id;
-  const { amount } = req.body;
+  const { amountDeposit } = req.body;
 
   // Validate amount
-  if (amount <= 0) {
+  if (amountDeposit <= 0) {
     return res.status(400).json({ message: 'Invalid amount' });
   }
 
   // Update user's account balance
   const q = "UPDATE user SET AccountBalance = AccountBalance + ? WHERE UserID = ?";
 
-  db.query(q, [amount, userId], (err, result) => {
+  db.query(q, [amountDeposit, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Account balance updated successfully' });
+  });
+});
+
+app.post('/withdraw-money', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { amountWithdrawn } = req.body;
+
+  // Validate amount
+  if (amountWithdrawn <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  // Update user's account balance
+  const q = "UPDATE user SET AccountBalance = AccountBalance - ? WHERE UserID = ?";
+
+  db.query(q, [amountWithdrawn, userId], (err, result) => {
     if (err) return res.status(500).json({ message: 'Database error', error: err });
 
     return res.json({ message: 'Account balance updated successfully' });
