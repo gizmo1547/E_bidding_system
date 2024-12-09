@@ -333,7 +333,21 @@ app.post('/update-email', authenticateToken, (req, res) => {
   });
 });
 
+//Update address
+app.post('/update-address', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { firstName, lastName, address, zip, city, state, country, phoneNumber } = req.body;
 
+  const q = "UPDATE user SET FirstName = ?, Lastname = ?, Address = ?, ZipCode = ?, City = ?, State = ?, Country = ?, PhoneNumber = ? WHERE UserID = ?";
+
+  db.query(q, [firstName, lastName, address, zip, city, state, country, phoneNumber, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Email updated successfully' });
+  });
+});
+
+/*
 // Add Money route
 app.post('/add-money', authenticateToken, (req, res) => {
   const userId = req.user.id;
@@ -353,6 +367,49 @@ app.post('/add-money', authenticateToken, (req, res) => {
     return res.json({ message: 'Account balance updated successfully' });
   });
 });
+*/
+
+// Add Money route
+app.post('/add-money', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { amountDeposit } = req.body;
+
+  // Validate amount
+  if (amountDeposit <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  // Update user's account balance
+  const q = "UPDATE user SET AccountBalance = AccountBalance + ? WHERE UserID = ?";
+
+  db.query(q, [amountDeposit, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Account balance updated successfully' });
+  });
+});
+
+//Withdraw 
+app.post('/withdraw-money', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { amountWithdrawn } = req.body;
+
+  // Validate amount
+  if (amountWithdrawn <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  // Update user's account balance
+  const q = "UPDATE user SET AccountBalance = AccountBalance - ? WHERE UserID = ?";
+
+  db.query(q, [amountWithdrawn, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    return res.json({ message: 'Account balance updated successfully' });
+  });
+});
+
+
 // Fetch all items (Edison Florian)
 app.get("/items", (req, res) => {
   const q = "SELECT Title,Description,AskingPrice FROM item";
