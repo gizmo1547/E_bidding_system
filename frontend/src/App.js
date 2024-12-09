@@ -18,6 +18,7 @@ import AdminRoute from './pages/AdminRoute'; // New component
 
 import ItemList from './pages/ItemList'; // Import ItemList component
 import ItemDetails from './pages/ItemDetails'; // Import ItemDetails component
+import SellItem from './pages/SellItem'; 
 
 function App()
 {
@@ -38,6 +39,7 @@ function App()
         <Route path="/account-manager" element={<PrivateRoute><AccountManager/></PrivateRoute>} />
         <Route path="/ItemList" element={<ItemList />} />
         <Route path="/item/:itemId" element={<ItemDetails />} />
+        <Route path="/sell-item" element={<PrivateRoute><SellItem/></PrivateRoute>}/>
        </Routes>
       
       </BrowserRouter>

@@ -1,6 +1,7 @@
 // AccountManager.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 //import './AccountManager.css';
 
 const AccountManager = () => {
@@ -16,6 +17,8 @@ const AccountManager = () => {
   const [newCountry, setCountry] = useState('');
   const [newPhoneNumber, setPhoneNumber] = useState('');
 
+
+  const navigate = useNavigate(); // useNavigate hook
 
   // Fetch user data
   useEffect(() => {
@@ -74,6 +77,12 @@ const AccountManager = () => {
       setMessage(error.response?.data?.message || 'Failed to update Details');
     }
   };
+
+
+  const goToSellItem = () => {
+    navigate('/sell-item'); // Navigate to sell-item page on button click
+  };
+
   return (
     <div className="account-manager-container">
       <h2>Account Manager</h2>
@@ -169,7 +178,8 @@ const AccountManager = () => {
         </div>
         <button type="submit">Update Details</button>
       </form>
-      <button type="submit">Sell Item</button>
+       {/* Button to navigate to sell-item page */}
+       <button onClick={goToSellItem}>Sell Item</button>
     </div>
   );
 };

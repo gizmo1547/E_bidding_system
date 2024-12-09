@@ -381,6 +381,60 @@ app.get("/items", (req, res) => {
 });
 */
 
+// Route to create a new item (sell an item)
+app.post('/items', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { title, description, askingPrice, listingType, deadline, image_url, categoryName } = req.body;
+
+  // Validate required fields
+  if (!title || !askingPrice || !listingType || !deadline || !categoryName) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+
+  // ListingType validation (optional)
+  const allowedTypes = ['ForSale', 'ForRent', 'Wanted'];
+  if (!allowedTypes.includes(listingType)) {
+    return res.status(400).json({ message: 'Invalid listing type.' });
+  }
+
+  // Deadline should be in the future (optional check)
+  const now = new Date();
+  const deadlineDate = new Date(deadline);
+  if (deadlineDate <= now) {
+    return res.status(400).json({ message: 'Deadline must be in the future.' });
+  }
+
+  // First, find the CategoryID from the categoryName
+  const categoryQuery = "SELECT CategoryID FROM Categories WHERE CategoryName = ?";
+  db.query(categoryQuery, [categoryName], (catErr, catData) => {
+    if (catErr) return res.status(500).json({ message: 'Database error', error: catErr });
+
+    if (catData.length === 0) {
+      // If category not found, return error
+      return res.status(400).json({ message: 'Category not found.' });
+    }
+
+    const categoryId = catData[0].CategoryID;
+
+    // Insert the new item
+    const insertQuery = `
+      INSERT INTO Item (OwnerID, Title, Description, AskingPrice, ListingType, Deadline, image_url, CategoryID)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(insertQuery, [userId, title, description || '', askingPrice, listingType, deadline, image_url || '', categoryId], (insertErr, insertResult) => {
+      if (insertErr) {
+        console.error(insertErr);
+        return res.status(500).json({ message: 'Database error', error: insertErr });
+      }
+
+      return res.json({ message: 'Item created successfully', itemId: insertResult.insertId });
+    });
+  });
+});
+
+
+
 // Endpoint to get all items with their highest bids
 app.get('/items-with-highest-bids', (req, res) => {
   const query = `
