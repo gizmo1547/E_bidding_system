@@ -48,7 +48,7 @@ const PlaceB = ({ itemId }) => {
       setBidder(''); // Reset fields after successful bid
     } catch (err) {
       // Handle error during bid placement
-      setError('Failed to place bid. Please try again.');
+      setError('Failed to place bid. Please try again and make sure you are loged in.');
       setMessage('');
     }
   };

@@ -14,8 +14,8 @@ const app = express()
 const db = mysql.createConnection({
    host:"localhost",//change if need it
    user:"root",//change if need it
-   password:"GermanVoronovich",//change to your password
-   database:"e_bidding_system"
+   password:"Edison@DB",//change to your password
+   database:"ebidding"
 })
 
 
@@ -639,20 +639,25 @@ app.post('/bot', (req, res) => {
 */
 // Endpoint to place a bid
 app.post('/bids', (req, res) => {
-  const { item_id, bidder, amount, user_id} = req.body;
+  const { item_id, bidder, amount, user_id } = req.body;
 
   // Validate input
   if (!item_id || !bidder || !amount || !user_id) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
 
+  // Prevent bids from "Anonymous" users
+  if (bidder.toLowerCase() === 'anonymous') {
+    return res.status(403).json({ message: 'Please log in or register to place a bid.' });
+  }
+
   // Prepare the SQL query to insert a new bid
-  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount) VALUES (?, ?, ?)';
+  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount, UserID) VALUES (?, ?, ?, ?)';
 
   // Execute the query
-  db.query(query, [item_id, bidder, amount], (err, result) => {
+  db.query(query, [item_id, bidder, amount, user_id], (err, result) => {
     if (err) {
-      console.error(err); // Log the error
+      console.error('Error placing bid:', err); // Log the error
       return res.status(500).json({ message: 'Error placing bid.' });
     }
 
@@ -685,6 +690,63 @@ app.get('/item/:itemId', (req, res) => {
       });
     });
   });
+});
+
+// Fetch comments for an item
+app.get('/comments/:itemId', (req, res) => {
+  const itemId = req.params.itemId;
+
+  const commentsQuery = `
+    SELECT 
+      c.CommentID, 
+      c.Content, 
+      CASE 
+        WHEN u.UserID = 0 THEN 'Anonymous' 
+        ELSE u.Username 
+      END AS Username
+    FROM comment c
+    LEFT JOIN user u ON c.UserID = u.UserID
+    WHERE c.ItemID = ?`;
+
+  db.query(commentsQuery, [itemId], (err, commentsData) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    if (commentsData.length === 0) return res.json({ message: 'No comments found for this item' });
+
+    res.json({
+      itemId: itemId,
+      comments: commentsData,
+    });
+  });
+});
+
+// Post a new comment
+app.post('/post-comments', async (req, res) => {
+  const { ItemId, Content } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+
+  let UserID = null; // Default to null for anonymous users
+
+  try {
+    if (token) {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      UserID = decoded.id; // Get UserID from JWT
+    }
+
+    // Use 0 for anonymous users
+    UserID = UserID || 0;
+
+    // Insert the comment into the database
+    const result = await db.query(
+      'INSERT INTO comment (ItemID, UserID, Content) VALUES (?, ?, ?)',
+      [ItemId, UserID, Content]
+    );
+
+    const commentId = result[0]?.insertId || result.insertId;
+    res.json({ success: true, commentId });
+  } catch (err) {
+    console.error('Error posting comment:', err);
+    res.status(500).json({ error: 'Failed to post comment' });
+  }
 });
 
 //Connecting to backend, port number 8000

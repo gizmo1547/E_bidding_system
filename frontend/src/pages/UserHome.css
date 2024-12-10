@@ -70,7 +70,7 @@ header h1 {
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  max-width: 250px;
+  max-width: 280px;
 }
 
 .sidebar h3 {
@@ -93,6 +93,7 @@ header h1 {
 .sidebar li.active,
 .sidebar li:hover {
   background-color: #4CAF50;
+  transition: background-color 0.3s ease;
   color: white;
 }
 
