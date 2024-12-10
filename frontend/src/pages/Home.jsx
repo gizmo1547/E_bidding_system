@@ -132,43 +132,10 @@ const handleRegister = () => {
         </aside>
 
         <section className="items-section">
+        <h3>  Welcome!! This is an online platform where you can bid on various items across different categories.</h3>
           <h3>{selectedCategory || 'All'} Items</h3>
           <ItemList items={items} />
         </section>
-      </div>
-
-      {/* Chat UI */}
-      <div className={`chat-container ${isChatMinimized ? 'minimized' : ''}`}>
-        <div className="chat-header">
-          <span>Chat Assistant</span>
-          <button 
-            className="chat-toggle-btn" 
-            onClick={() => setIsChatMinimized(!isChatMinimized)}
-          >
-            {isChatMinimized ? '▲' : '▼'}
-          </button>
-        </div>
-
-        {!isChatMinimized && (
-          <>
-            <div className="chat-messages">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`chat-message ${msg.sender}`}>
-                  <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
-                </div>
-              ))}
-            </div>
-            <form onSubmit={handleSendMessage} className="chat-input-form">
-              <input
-                type="text"
-                placeholder="Ask me something..."
-                value={userInput}
-                onChange={e => setUserInput(e.target.value)}
-              />
-              <button type="submit">Send</button>
-            </form>
-          </>
-        )}
       </div>
     </div>
   );
