@@ -286,7 +286,7 @@ app.get('/user-data', authenticateToken, (req, res) => {
 });
 
 
-
+/*
 // Login route
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -317,7 +317,49 @@ app.post('/login', async (req, res) => {
       res.status(401).json({ message: 'Invalid credentials' });//google if you have this error
     }
   });
+});*/
+
+
+
+
+
+// Login route
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  // Query to find the user by username
+  const query = "SELECT * FROM user WHERE Username = ?";
+
+  db.query(query, [username], async (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+    if (result.length === 0) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const user = result[0];
+
+    const passwordMatch = await bcrypt.compare(password, user.Password);
+    if (passwordMatch) {
+      // If password matches, generate a JWT token
+      const userPayload = { id: user.UserID, role: user.Role }; // Adjust 'UserID' to match your DB schema
+      const token = jwt.sign(userPayload, 'your_jwt_secret', { expiresIn: '1h' });
+
+      // Respond with the token, userID, and role
+      res.json({
+        message: 'Login successful',
+        token,
+        role: user.Role,
+        userID: user.UserID, // Add userID here
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  });
 });
+
+
+
 
 // Update Email route
 app.post('/update-email', authenticateToken, (req, res) => {
@@ -385,7 +427,10 @@ app.get("/items", (req, res) => {
 
 
 
-// Endpoint to get all items with their highest bids
+
+
+
+/*// Endpoint to get all items with their highest bids
 app.get('/items-with-highest-bids', (req, res) => {
   const query = `
     SELECT 
@@ -402,9 +447,44 @@ app.get('/items-with-highest-bids', (req, res) => {
     res.json(results);
   });
 });
+*/
+
+app.get('/items-with-highest-bids', (req, res) => {
+  // Get category ID from query params
+  const categoryID = req.query.categoryID;
+
+  // Base query
+  let query = `
+    SELECT 
+      i.*, 
+      (SELECT MAX(b.BidAmount) 
+       FROM Bid b 
+       WHERE b.ItemID = i.ItemID AND b.sAccepted = 0) AS highest_bid
+    FROM Item i
+    WHERE i.IsRemoved = 0
+  `;
+  
+  // If a category ID is provided, filter by it
+  if (categoryID) {
+    query += ` AND i.CategoryID = ?`;
+  }
+
+  // Execute query with category ID if provided
+  db.query(query, categoryID ? [categoryID] : [], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
 
 
 
+ 
+
+
+/*
 // Endpoint to place a bid
 app.post('/bids', (req, res) => {
   const { item_id, bidder, amount, user_id} = req.body;
@@ -427,11 +507,59 @@ app.post('/bids', (req, res) => {
     // Return success response with the generated BidID
     res.json({ message: 'Bid placed successfully!', bidId: result.insertId });
   });
+});*/
+
+// Endpoint to place a bid
+// Place a bid route (without token authentication)
+app.post('/api/placebid', (req, res) => {
+  const { itemID, bidAmount, bidderID } = req.body;
+
+  // Step 1: Check if the bidder exists in the User table
+  const checkUserQuery = "SELECT * FROM User WHERE UserID = ?";
+  db.query(checkUserQuery, [bidderID], (err, userResult) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error during user check.', error: err });
+    }
+
+    if (userResult.length === 0) {
+      return res.status(400).json({ message: 'Bidder does not exist.' });
+    }
+
+    // Step 2: If the bidder exists, insert the bid into the Bid table
+    const insertBidQuery = `
+      INSERT INTO Bid (ItemID, BidAmount, BidDate, BidderID) 
+      VALUES (?, ?, NOW(), ?)
+    `;
+    db.query(insertBidQuery, [itemID, bidAmount, bidderID], (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Failed to place bid', error: err });
+      }
+      res.json({ message: 'Bid placed successfully!' });
+    });
+  });
+});
+
+app.get('/api/getHighestBid/:itemID', (req, res) => {
+  const itemID = req.params.itemID;
+  
+  // Get the highest bid for the item
+  const highestBidQuery = "SELECT MAX(BidAmount) AS highestBid FROM Bid WHERE ItemID = ?";
+  db.query(highestBidQuery, [itemID], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error during bid retrieval', error: err });
+    }
+    const highestBid = result[0]?.highestBid || 0;
+    res.json({ highestBid });
+  });
 });
 
 
 
 
+
+
+
+/*
 // Endpoint to get a specific item with all its bids
 app.get('/item/:itemId', (req, res) => {
   const itemId = req.params.itemId;
@@ -450,6 +578,43 @@ app.get('/item/:itemId', (req, res) => {
       res.json({
         item: itemData[0],  // Send the item data
         bids: bidsData,     // Send all bids for the item
+      });
+    });
+  });
+});
+*/
+
+app.get('/item/:itemId', (req, res) => {
+  const itemId = req.params.itemId;
+
+  // Query to get the item details
+  const itemQuery = "SELECT * FROM item WHERE ItemID = ? AND IsRemoved = 0";
+
+  db.query(itemQuery, [itemId], (err, itemData) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    if (itemData.length === 0) return res.status(404).json({ message: 'Item not found or removed.' });
+
+    // Query to get all bids for the item with bidder username
+    const bidsQuery = `
+      SELECT 
+        Bid.BidID, 
+        Bid.ItemID, 
+        Bid.BidAmount, 
+        Bid.BidDate, 
+        User.Username AS BidderName  -- Get the Username from the User table
+      FROM Bid
+      INNER JOIN User ON Bid.BidderID = User.UserID  -- Join with User table using BidderID
+      WHERE Bid.ItemID = ?
+      ORDER BY Bid.BidDate DESC
+    `;
+
+    db.query(bidsQuery, [itemId], (err, bidsData) => {
+      if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+      // Respond with item and its bids including bidder's name
+      res.json({
+        item: itemData[0],  // Send the item data
+        bids: bidsData,     // Send all bids for the item along with bidder's username
       });
     });
   });
