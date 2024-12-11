@@ -1,44 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './UserHome.css'; 
-import ItemList from './ItemList';
+import './UserHome.css'; // Import your styles
+import ItemList from './ItemList'; // Import the ItemList component
 
 const UserHome = () => {
   const [userData, setUserData] = useState({});
-  const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [message, setMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
-  const [isChatMinimized, setIsChatMinimized] = useState(false); // New state
-
+  const [categories, setCategories] = useState([]); // Categories state
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [items, setItems] = useState([]); // Define the 'items' state here
   const navigate = useNavigate();
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await axios.get('http://localhost:8000/categories');
-      const categoryNames = res.data.map((category) => category.CategoryName);
-      setCategories(categoryNames);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setMessage('Failed to load categories. Please try again.');
-    }
-  }, []);
-
+  // Fetch user data from the backend
   const fetchUserData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login');
+        navigate('/login'); // Redirect to login if no token
         return;
       }
 
       const res = await axios.get('http://localhost:8000/user-data', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setUserData(res.data.user);
@@ -46,17 +30,30 @@ const UserHome = () => {
       console.error('Error fetching user data:', error);
       setMessage('Failed to load user data. Please try again.');
       if (error.response && error.response.status === 401) {
-        navigate('/login');
+        navigate('/login'); // Redirect to login if unauthorized
       }
     }
   }, [navigate]);
 
+  // Fetch categories from the backend
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/categories');
+      const categoryNames = res.data.map(category => category.CategoryName);
+      setCategories(categoryNames);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setMessage('Failed to load categories. Please try again.');
+    }
+  }, []);
+
+  // Fetch items based on selected category
   const fetchItems = useCallback(async () => {
     try {
       const res = await axios.get('http://localhost:8000/items', {
         params: selectedCategory ? { category: selectedCategory } : {},
       });
-      setItems(res.data);
+      setItems(res.data); // Update the 'items' state here
     } catch (error) {
       console.error('Error fetching items:', error);
       setMessage('Failed to load items. Please try again.');
@@ -64,55 +61,21 @@ const UserHome = () => {
   }, [selectedCategory]);
 
   useEffect(() => {
-    fetchCategories();
     fetchUserData();
+    fetchCategories();
     fetchItems();
-  }, [fetchCategories, fetchUserData, fetchItems]);
+  }, [fetchUserData, fetchCategories, fetchItems]);
 
+  // Logout function
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     navigate('/login');
   };
 
-  const handleAddMoney = () => {
-    navigate('/add-money');
-  };
-
-  const handleAccountManager = () => {
-    navigate('/account-manager');
-  };
-
+  // Function to handle category selection
   const handleCategoryClick = (category) => {
     setSelectedCategory(category === 'More' ? null : category);
-  };
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!userInput.trim()) return;
-
-    const newUserMessage = { sender: 'user', text: userInput.trim() };
-    setChatMessages((prev) => [...prev, newUserMessage]);
-    setUserInput('');
-
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        'http://localhost:8000/bot',
-        { message: userInput.trim() },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const botReply = { sender: 'bot', text: res.data.reply };
-      setChatMessages((prev) => [...prev, botReply]);
-    } catch (error) {
-      console.error('Error chatting with bot:', error);
-      const botReply = { sender: 'bot', text: 'Sorry, something went wrong.' };
-      setChatMessages((prev) => [...prev, botReply]);
-    }
   };
 
   return (
@@ -122,8 +85,8 @@ const UserHome = () => {
         <div className="user-info">
           <span>Welcome, {userData.Username}!</span>
           <span>Balance: ${userData.AccountBalance?.toFixed(2) || '0.00'}</span>
-          <button onClick={handleAddMoney}>Add Money</button>
-          <button onClick={handleAccountManager}>Account Manager</button>
+          <button onClick={() => navigate('/add-money')}>Add Money</button>
+          <button onClick={() => navigate('/account-manager')}>Account Manager</button>
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
@@ -150,48 +113,15 @@ const UserHome = () => {
 
         <section className="items-section">
           <h3>{selectedCategory || 'All'} Items</h3>
-          <ItemList items={items} />
+          {/* Embed ItemList as a section */}
+         <ItemList /> {/* This will render your ItemList component */}
         </section>
-      </div>
-
-      {/* Chat UI */}
-      <div className={`chat-container ${isChatMinimized ? 'minimized' : ''}`}>
-        <div className="chat-header">
-          <span>Chat Assistant</span>
-          <button 
-            className="chat-toggle-btn" 
-            onClick={() => setIsChatMinimized(!isChatMinimized)}
-          >
-            {isChatMinimized ? '▲' : '▼'}
-          </button>
-        </div>
-
-        {!isChatMinimized && (
-          <>
-            <div className="chat-messages">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`chat-message ${msg.sender}`}>
-                  <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
-                </div>
-              ))}
-            </div>
-            <form onSubmit={handleSendMessage} className="chat-input-form">
-              <input
-                type="text"
-                placeholder="Ask me something..."
-                value={userInput}
-                onChange={e => setUserInput(e.target.value)}
-              />
-              <button type="submit">Send</button>
-            </form>
-          </>
-        )}
       </div>
     </div>
   );
-};
+}; 
 
-export default UserHome;
+export default UserHome; 
 
 /*
 import React, { useState, useEffect, useCallback } from 'react';
