@@ -1,0 +1,26 @@
+
+Alter table Bid
+ADD BidderID INT Not null;
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE Bid
+SET BidderID = 1
+WHERE BidderID NOT IN (SELECT UserID FROM User);
+
+SET SQL_SAFE_UPDATES = 1;
+
+
+ALTER TABLE Bid
+ADD CONSTRAINT FK_Bidder_User
+FOREIGN KEY (BidderID) 
+REFERENCES  User (UserID)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE Bid
+drop constraint BidderName_FK;
+
+ALTER TABLE Bid
+drop column BidderName;
+
