@@ -222,6 +222,8 @@ app.put('/admin/applications/:id/approve', verifySuperUser, (req, res) => {
   const applicationId = req.params.id;
   const approvedBy = req.user.UserID;
 
+
+/*
   const q = `
     UPDATE Application SET IsApproved = TRUE, ApprovedBy = ?, ApprovalDate = NOW()
     WHERE ApplicationID = ?
@@ -232,7 +234,30 @@ app.put('/admin/applications/:id/approve', verifySuperUser, (req, res) => {
     res.json({ message: 'Application approved successfully' });
   });
 });
+*/
+const q = `
+  UPDATE Application SET IsApproved = TRUE, ApprovedBy = ?, ApprovalDate = NOW()
+  WHERE ApplicationID = ?
+`;
 
+db.query(q, [approvedBy, applicationId], (err, result) => {
+  if (err) return res.status(500).json(err);
+
+  const q2 = `SELECT VisitorID FROM Application WHERE ApplicationID = ?`;
+  db.query(q2, [applicationId], (err2, data) => {
+    if (err2) return res.status(500).json(err2);
+    if (data.length === 0) return res.status(404).json({ message: 'Application not found' });
+
+    const visitorID = data[0].VisitorID;
+
+    const q3 = `UPDATE User SET Role='User', IsActive=1 WHERE UserID = ?`;
+    db.query(q3, [visitorID], (err3) => {
+      if (err3) return res.status(500).json(err3);
+      return res.json({ message: 'Application approved and user activated successfully.' });
+    });
+  });
+});
+});
 
 // Registration route
 app.post("/users", async (req, res) => {
@@ -240,27 +265,40 @@ app.post("/users", async (req, res) => {
 
   // Validate arithmetic question
   if (parseInt(userAnswer) !== parseInt(correctAnswer)) {
-      return res.status(400).json({ message: 'Incorrect arithmetic answer.' });
+    return res.status(400).json({ message: 'Incorrect arithmetic answer.' });
   }
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const q = "INSERT INTO user (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate) VALUES (?, ?, ?, 'User', 0, 0, 0, 0, 0, 0, 1, NOW())";
+  const q = `
+    INSERT INTO user 
+    (Username, Password, Email, Role, AccountBalance, IsVIP, IsSuspended, SuspensionCount, AverageRating, NumberOfTransactions, IsActive, RegistrationDate)
+    VALUES (?, ?, ?, 'Visitor', 0, 0, 0, 0, 0, 0, 0, NOW());
+  `;
 
-  const values = [
-      username,
-      hashedPassword,
-      email
-  ];
+  const values = [username, hashedPassword, email];
 
-  // Execute the query
+  // Execute the user insert query
   db.query(q, values, (err, data) => {
-      if (err) return res.json(err);
-      return res.json({ message: 'Registration successful' });
+    if (err) return res.status(500).json(err);
+
+    // Now we have a new user (Visitor). Let's create an Application for them
+    const visitorId = data.insertId; // This is the newly created user's ID
+
+    const applicationQuery = `
+      INSERT INTO Application 
+      (VisitorID, ArithmeticQuestion, ProvidedAnswer, IsHumanVerified, IsApproved, ApplicationDate)
+      VALUES (?, 'Some question', ?, false, false, NOW())
+    `;
+
+    // Insert the Application record
+    db.query(applicationQuery, [visitorId, userAnswer], (appErr, appData) => {
+      if (appErr) return res.status(500).json(appErr);
+      return res.json({ message: 'Registration successful. Waiting for admin approval.' });
+    });
   });
 });
-  
 
 // Route to get user data
 app.get('/user-data', authenticateToken, (req, res) => {
