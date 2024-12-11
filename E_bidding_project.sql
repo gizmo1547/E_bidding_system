@@ -187,16 +187,6 @@ ALTER TABLE User MODIFY Role ENUM('Visitor', 'User', 'SuperUser') NOT NULL DEFAU
 INSERT INTO User (Username, Password, Email, Role, IsActive, RegistrationDate)
 VALUES ('admin', '$2b$10$Vj8DbhGWmRcA2DNIPtJHR.rqHUs0WDdo3WBDEz1pxPdTJlPl//GF6', 'admin@example.com', 'SuperUser', 1, NOW());
 
---SQL Script to Create imgSrc Table
-CREATE TABLE IF NOT EXISTS imgSrc (
-    imgID INT AUTO_INCREMENT PRIMARY KEY,
-    ItemID INT NOT NULL,
-    imgURL VARCHAR(255) NOT NULL,
-    IsPrimary BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
 
 -- Create Categories Table
 CREATE TABLE IF NOT EXISTS Categories (
@@ -211,3 +201,22 @@ ADD COLUMN CategoryID INT,
 ADD FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
     ON DELETE SET NULL
     ON UPDATE CASCADE;
+
+ALTER TABLE Bid 
+DROP FOREIGN KEY bid_ibfk_2;
+
+ALTER TABLE Bid
+DROP COLUMN BidderID,
+DROP INDEX BidderID;
+
+Alter Table Bid
+ADD BidderName VARCHAR(50) NOT NULL;
+
+Alter table Bid
+ADD CONSTRAINT BidderName_FK FOREIGN KEY (BidderName) References User(Username);
+
+ALTER TABLE Bid
+CHANGE COLUMN IsAccepted sAccepted  TINYINT(1) NULL DEFAULT '0' ;
+
+ALTER TABLE Item
+ADD COLUMN image_url VARCHAR(350);
