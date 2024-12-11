@@ -53,11 +53,13 @@ const ItemList = () => {
           value={selectedCategory}
           onChange={handleCategoryChange}
         >
+          
           <option value="">All Categories</option>
           {categories.map(category => (
             <option key={category.CategoryID} value={category.CategoryID}>
               {category.CategoryName}
             </option>
+            
           ))}
         </select>
       </div>
