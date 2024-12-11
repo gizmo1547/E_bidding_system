@@ -310,7 +310,7 @@ app.post('/login', async (req, res) => {
     if (passwordMatch) {
       // If password matches, generate a JWT token
       const userPayload = { id: user.UserID, role: user.Role }; // Adjust 'UserID' to match your DB schema
-      const token = jwt.sign(userPayload, 'your_jwt_secret', { expiresIn: '1h' });
+      const token = jwt.sign(userPayload, 'your_jwt_secret', { expiresIn: '7d' });
       res.json({ message: 'Login successful', token, role: user.Role });
     } else {
       // If the password doesn't match, respond with an error
