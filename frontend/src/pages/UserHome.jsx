@@ -9,8 +9,13 @@ const UserHome = () => {
   const [message, setMessage] = useState('');
   const [categories, setCategories] = useState([]); // Categories state
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [items, setItems] = useState([]); // Define the 'items' state here
+  const [items, setItems] = useState([]); 
   const navigate = useNavigate();
+
+  // Chat bot states
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState('');
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
 
   // Fetch user data from the backend
   const fetchUserData = useCallback(async () => {
@@ -53,7 +58,7 @@ const UserHome = () => {
       const res = await axios.get('http://localhost:8000/items', {
         params: selectedCategory ? { category: selectedCategory } : {},
       });
-      setItems(res.data); // Update the 'items' state here
+      setItems(res.data); 
     } catch (error) {
       console.error('Error fetching items:', error);
       setMessage('Failed to load items. Please try again.');
@@ -70,12 +75,42 @@ const UserHome = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userID');
     navigate('/login');
   };
 
   // Function to handle category selection
   const handleCategoryClick = (category) => {
     setSelectedCategory(category === 'More' ? null : category);
+  };
+
+  // Chat bot functions
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setChatMessages(prev => [...prev, { sender: 'bot', text: 'Please log in to chat.' }]);
+      return;
+    }
+
+    // Add the user's message to chat
+    const newUserMessage = { sender: 'user', text: userInput.trim() };
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setUserInput('');
+
+    try {
+      const res = await axios.post('http://localhost:8000/bot', { message: userInput.trim() }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const botMessage = { sender: 'bot', text: res.data.reply };
+      setChatMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error sending message to bot:', error);
+      const errorMsg = { sender: 'bot', text: 'Oops! Something went wrong.' };
+      setChatMessages(prev => [...prev, errorMsg]);
+    }
   };
 
   return (
@@ -113,211 +148,50 @@ const UserHome = () => {
 
         <section className="items-section">
           <h3>{selectedCategory || 'All'} Items</h3>
-          {/* Embed ItemList as a section */}
-         <ItemList /> {/* This will render your ItemList component */}
+          <ItemList items={items} />
         </section>
       </div>
-    </div>
-  );
-}; 
 
-export default UserHome; 
-
-/*
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './UserHome.css'; // Import the CSS file for styling
-import ItemList from './ItemList'; // Import the ItemList component
-
-const UserHome = () => {
-  const [userData, setUserData] = useState({});
-  const [categories, setCategories] = useState([]); // Replace static categories with dynamic state
-  const [items, setItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [message, setMessage] = useState(''); // For error handling
-  const [chatMessages, setChatMessages] = useState([]); // Add chat state
-  const [userInput, setUserInput] = useState(''); // For the chat text input
-
-  const navigate = useNavigate();
-
-  // Function to fetch categories from the backend
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await axios.get('http://localhost:8000/categories'); // Backend endpoint for categories
-      const categoryNames = res.data.map((category) => category.CategoryName); // Extract category names
-      setCategories(categoryNames); // Update the state
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setMessage('Failed to load categories. Please try again.');
-    }
-  }, []);
-
-  // Function to fetch user data from the backend
-  const fetchUserData = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        // If no token, redirect to login
-        navigate('/login');
-        return;
-      }
-
-      const res = await axios.get('http://localhost:8000/user-data', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setUserData(res.data.user);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setMessage('Failed to load user data. Please try again.');
-      if (error.response && error.response.status === 401) {
-        navigate('/login'); // Redirect to login if unauthorized
-      }
-    }
-  }, [navigate]);
-
-  // Function to fetch items from the backend
-  const fetchItems = useCallback(async () => {
-    try {
-      const res = await axios.get('http://localhost:8000/items', {
-        params: selectedCategory ? { category: selectedCategory } : {},
-      });
-      setItems(res.data);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-      setMessage('Failed to load items. Please try again.');
-    }
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    fetchCategories(); // Fetch categories from the backend
-    fetchUserData(); // Fetch user data from the backend
-    fetchItems(); // Fetch items based on selected category
-  }, [fetchCategories, fetchUserData, fetchItems]);
-
-  // Function to handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    navigate('/login');
-  };
-
-  // Function to navigate to add money page
-  const handleAddMoney = () => {
-    navigate('/add-money');
-  };
-
-  // Function to navigate to account manager page
-  const handleAccountManager = () => {
-    navigate('/account-manager');
-  };
-
-  // Function to handle category selection
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category === 'More' ? null : category);
-  };
- 
-
-
-  // Complete handleSendMessage function
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!userInput.trim()) return;
-
-    const newUserMessage = { sender: 'user', text: userInput.trim() };
-    setChatMessages((prev) => [...prev, newUserMessage]);
-    setUserInput('');
-
-    try {
-      const token = localStorage.getItem('token');
-
-      const res = await axios.post(
-        'http://localhost:8000/bot', 
-        { message: userInput.trim() },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const botReply = { sender: 'bot', text: res.data.reply };
-      setChatMessages((prev) => [...prev, botReply]);
-    } catch (error) {
-      console.error('Error chatting with bot:', error);
-      const botReply = { sender: 'bot', text: 'Sorry, something went wrong.' };
-      setChatMessages((prev) => [...prev, botReply]);
-    }
-  };
-
-  return (
-    <div className="user-home-container">
-      <header>
-        <h1>E-Bidding Store</h1>
-        <div className="user-info">
-          <span>Welcome, {userData.Username}!</span>
-          <span>Balance: ${userData.AccountBalance?.toFixed(2) || '0.00'}</span>
-          <button onClick={handleAddMoney}>Add Money</button>
-          <button onClick={handleAccountManager}>Account Manager</button>
-          <button className="logout-button" onClick={handleLogout}>
-            Logout
+      {/* Chat bot UI */}
+      <div className={`chat-container ${isChatMinimized ? 'minimized' : ''}`}>
+        <div className="chat-header">
+          <span>Chat Assistant</span>
+          <button 
+            className="chat-toggle-btn" 
+            onClick={() => setIsChatMinimized(!isChatMinimized)}
+          >
+            {isChatMinimized ? '▲' : '▼'}
           </button>
         </div>
-      </header>
 
-      {message && <p className="error">{message}</p>}
-
-      <div className="main-content">
-        <aside className="sidebar">
-          <h3>Categories</h3>
-          <ul>
-            {categories.map((category, index) => (
-              <li
-                key={index}
-                className={selectedCategory === category ? 'active' : ''}
-                onClick={() => handleCategoryClick(category)}
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-        </aside>
-
-        <section className="items-section">
-          <h3>{selectedCategory || 'All'} Items</h3>
-             {/* Embed ItemList as a section *///}
-             //<ItemList /> {/* This will render your ItemList component */}
-             /*
-        </section>
-      </div>
-          
-      <div className="chat-container">
-        <div className="chat-messages">
-          {chatMessages.map((msg, i) => (
-            <div key={i} className={`chat-message ${msg.sender}`}>
-              <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
+        {!isChatMinimized && (
+          <>
+            <div className="chat-messages">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`chat-message ${msg.sender}`}>
+                  <strong>{msg.sender === 'user' ? 'You' : 'Bot'}: </strong>{msg.text}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <form onSubmit={handleSendMessage} className="chat-input-form">
-          <input
-            type="text"
-            placeholder="Ask me something..."
-            value={userInput}
-            onChange={e => setUserInput(e.target.value)}
-          />
-          <button type="submit">Send</button>
-        </form>
+            <form onSubmit={handleSendMessage} className="chat-input-form">
+              <input
+                type="text"
+                placeholder="Ask me something..."
+                value={userInput}
+                onChange={e => setUserInput(e.target.value)}
+              />
+              <button type="submit">Send</button>
+            </form>
+          </>
+        )}
       </div>
-
     </div>
   );
 };
 
 export default UserHome;
-*/
+
+
 
 
 
