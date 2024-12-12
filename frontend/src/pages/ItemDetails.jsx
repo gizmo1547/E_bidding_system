@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import PlaceB from './PlaceB'; // Import PlaceB component
-import './ItemDetails.css'; // Import the CSS file
+import PlaceB from './PlaceB'; 
+import './ItemDetails.css';
 
 const ItemDetails = () => {
-  const { itemId } = useParams(); // Get itemId from the route parameter
+  const { itemId } = useParams();
   const [item, setItem] = useState(null);
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,9 +15,11 @@ const ItemDetails = () => {
   const [commentContent, setCommentContent] = useState('');
   const [visitorName, setVisitorName] = useState('');
 
+  const [timeLeft, setTimeLeft] = useState('');
   const token = localStorage.getItem('token');
 
   useEffect(() => {
+    // Fetch item and bids
     const fetchItemDetails = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/item/${itemId}`);
@@ -29,12 +31,48 @@ const ItemDetails = () => {
         setLoading(false);
       }
     };
-
     fetchItemDetails();
   }, [itemId]);
 
   useEffect(() => {
     // Fetch comments
+    axios.get(`http://localhost:8000/comments/${itemId}`)
+      .then(res => setComments(res.data))
+      .catch(err => console.error(err));
+  }, [itemId]);
+
+  // Insert this useEffect here, after item is fetched
+  useEffect(() => {
+    if (!item || !item.Deadline) return;
+
+    let interval;
+
+    const updateTimer = () => {
+      const now = new Date();
+      const deadline = new Date(item.Deadline);
+      const diff = deadline - now;
+
+      if (diff <= 0) {
+        setTimeLeft('Bidding ended');
+        clearInterval(interval);
+      } else {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        setTimeLeft(`${days}d ${hours}h ${minutes}m remaining`);
+      }
+    };
+
+    // Run once immediately
+    updateTimer();
+
+    // Run every 60 seconds
+    interval = setInterval(updateTimer, 60000);
+
+    return () => clearInterval(interval);
+  }, [item]);
+
+  useEffect(() => {
     axios
       .get(`http://localhost:8000/comments/${itemId}`)
       .then((res) => setComments(res.data))
@@ -44,59 +82,53 @@ const ItemDetails = () => {
   const handleAddComment = async (e) => {
     e.preventDefault();
     const commentData = { itemId, content: commentContent };
-    if (!token) {
-      // Visitor must provide a name
-      commentData.visitorName = visitorName;
-    }
+    if (!token) commentData.visitorName = visitorName;
+
     const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    try {
+      await axios.post('http://localhost:8000/comments', commentData, { headers });
+      const updated = await axios.get(`http://localhost:8000/comments/${itemId}`);
+      setComments(updated.data);
+      setCommentContent('');
+      setVisitorName('');
+    } catch (err) {
+      console.error('Error adding comment:', err);
     }
-    await axios.post('http://localhost:8000/comments', commentData, { headers });
-    // Refresh comments
-    const updated = await axios.get(`http://localhost:8000/comments/${itemId}`);
-    setComments(updated.data);
-    setCommentContent('');
-    setVisitorName('');
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="item-details-and-comments-container">
-      <div className="item-details-container">
+      <div className="main-content">
         <div className="item-details">
           <h1>Item Details</h1>
-          <div>
-            <img
-              src={item.image_url}
-              alt={item.Name}
-              className="item-image"
-            />
-          </div>
-          <h2>{item.Name}</h2>
-          <p>{item.Description}</p>
-          <p>Starting Price: ${item.AskingPrice}</p>
-          <p>Status: {item.Status}</p>
-
+          {item && (
+            <>
+              <div>
+                <img src={item.image_url} alt={item.Name} className="item-image" />
+              </div>
+              <h2>{item.Name}</h2>
+              <p>{item.Description}</p>
+              <p>Starting Price: ${item.AskingPrice}</p>
+              <p>Status: {item.Status}</p>
+              <p>Time Left: {timeLeft}</p>
+            </>
+          )}
           <h3>Bids</h3>
           <ul>
             {bids.map((bid) => (
               <li key={bid.BidID}>
-                {bid.BidderName} placed a bid of ${bid.BidAmount} on{' '}
-                {new Date(bid.BidDate).toLocaleString()}
+                {bid.BidderName} placed a bid of ${bid.BidAmount} on {new Date(bid.BidDate).toLocaleString()}
               </li>
             ))}
           </ul>
         </div>
 
-        {/* PlaceB component for placing a bid */}
+        {/* PlaceB Component */}
         <div className="placebid-section-container">
           <PlaceB itemId={itemId} />
         </div>
@@ -109,16 +141,12 @@ const ItemDetails = () => {
           {comments.map((c) => (
             <div key={c.CommentID} className="comment-card">
               <p>
-                <strong>
-                  {c.UserID ? 'User' : c.VisitorName || 'Visitor'}:
-                </strong>{' '}
-                {c.Content}
+                <strong>{c.UserID ? 'User' : c.VisitorName || 'Visitor'}:</strong> {c.Content}
               </p>
               <small>{new Date(c.CommentDate).toLocaleString()}</small>
             </div>
           ))}
         </div>
-
         <form onSubmit={handleAddComment} className="comment-form">
           {!token && (
             <div className="form-group">
@@ -153,3 +181,4 @@ const ItemDetails = () => {
 };
 
 export default ItemDetails;
+
