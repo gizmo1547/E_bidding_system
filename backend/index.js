@@ -481,34 +481,61 @@ app.get('/items-with-highest-bids', (req, res) => {
 
 
 
- 
+app.post('/api/placebid', (req, res) => {
+  const { itemID, bidAmount, bidderID } = req.body;
+
+  // Step 1: Check if the bidder exists in the User table
+  const checkUserQuery = "SELECT * FROM User WHERE UserID = ?";
+  db.query(checkUserQuery, [bidderID], (err, userResult) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error during user check.', error: err });
+    }
+
+    if (userResult.length === 0) {
+      return res.status(400).json({ message: 'Bidder does not exist.' });
+    }
+
+    // Step 2: Get the item details (including deadline)
+    const itemQuery = "SELECT * FROM item WHERE ItemID = ?";
+    db.query(itemQuery, [itemID], (err, itemResult) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error fetching item data.', error: err });
+      }
+
+      if (itemResult.length === 0) {
+        return res.status(404).json({ message: 'Item not found.' });
+      }
+
+      const item = itemResult[0];
+      const deadline = new Date(item.Deadline); // The item’s deadline
+      const currentTime = new Date(); // Current server time
+
+      // Step 3: Check if the current time is before the deadline
+      if (currentTime > deadline) {
+        return res.status(400).json({ message: 'Bidding deadline has passed. You can no longer place a bid.' });
+      }
+
+      // Step 4: If the bidder exists and the deadline is not passed, insert the bid
+      const insertBidQuery = `
+        INSERT INTO Bid (ItemID, BidAmount, BidDate, BidderID) 
+        VALUES (?, ?, NOW(), ?)
+      `;
+      db.query(insertBidQuery, [itemID, bidAmount, bidderID], (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: 'Failed to place bid', error: err });
+        }
+        res.json({ message: 'Bid placed successfully!' });
+      });
+    });
+  });
+});
+
+
+
+
 
 
 /*
-// Endpoint to place a bid
-app.post('/bids', (req, res) => {
-  const { item_id, bidder, amount, user_id} = req.body;
-
-  // Validate input
-  if (!item_id || !bidder || !amount || !user_id) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
-
-  // Prepare the SQL query to insert a new bid
-  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount) VALUES (?, ?, ?)';
-
-  // Execute the query
-  db.query(query, [item_id, bidder, amount], (err, result) => {
-    if (err) {
-      console.error(err); // Log the error
-      return res.status(500).json({ message: 'Error placing bid.' });
-    }
-
-    // Return success response with the generated BidID
-    res.json({ message: 'Bid placed successfully!', bidId: result.insertId });
-  });
-});*/
-
 // Endpoint to place a bid
 // Place a bid route (without token authentication)
 app.post('/api/placebid', (req, res) => {
@@ -538,6 +565,13 @@ app.post('/api/placebid', (req, res) => {
     });
   });
 });
+
+*/
+
+
+
+
+
 
 app.get('/api/getHighestBid/:itemID', (req, res) => {
   const itemID = req.params.itemID;
