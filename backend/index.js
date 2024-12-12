@@ -306,6 +306,8 @@ app.get('/user-data', authenticateToken, (req, res) => {
 
   // Fetch user information from the database
   const userQuery = "SELECT * FROM user WHERE UserID = ?";
+  //const userQuery = "SELECT Username, AccountBalance FROM user WHERE UserID = ?";
+
   const itemsQuery = "SELECT * FROM item WHERE OwnerID = ?";//items
 
   db.query(userQuery, [userId], (err, userData) => {
@@ -799,82 +801,7 @@ app.post('/comments', (req, res) => {
 });
 
 
-/*
-app.post('/bot', (req, res) => {
-  const userMessage = req.body.message;
-  
-  // Basic logic: respond differently based on user query
-  let reply = "I'm here to help! You asked: " + userMessage;
 
-  // Example: If user mentions "categories"
-  if (userMessage.toLowerCase().includes("categories")) {
-    reply = "Our categories are: " + ["Electronics", "Books", "Art"].join(", ");
-  }
-
-  // If user mentions "help"
-  if (userMessage.toLowerCase().includes("help")) {
-    reply = "Sure, I can help. Ask me about categories, items, or your account.";
-  }
-
-  res.json({ reply });
-});
-
-*/
-// Endpoint to place a bid
-/*
-app.post('/bids', (req, res) => {
-  const { item_id, bidder, amount, user_id} = req.body;
-
-  // Validate input
-  if (!item_id || !bidder || !amount || !user_id) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
-
-  // Prepare the SQL query to insert a new bid
-  const query = 'INSERT INTO Bid (ItemID, BidderName, BidAmount) VALUES (?, ?, ?)';
-
-  // Execute the query
-  db.query(query, [item_id, bidder, amount], (err, result) => {
-    if (err) {
-      console.error(err); // Log the error
-      return res.status(500).json({ message: 'Error placing bid.' });
-    }
-
-    // Return success response with the generated BidID
-    res.json({ message: 'Bid placed successfully!', bidId: result.insertId });
-  });
-});
-*/
-/*
-// Place a bid route (without token authentication)
-app.post('/api/placebid', (req, res) => {
-  const { itemID, bidAmount, bidderID } = req.body;
-
-  // Step 1: Check if the bidder exists in the User table
-  const checkUserQuery = "SELECT * FROM User WHERE UserID = ?";
-  db.query(checkUserQuery, [bidderID], (err, userResult) => {
-    if (err) {
-      return res.status(500).json({ message: 'Database error during user check.', error: err });
-    }
-
-    if (userResult.length === 0) {
-      return res.status(400).json({ message: 'Bidder does not exist.' });
-    }
-
-    // Step 2: If the bidder exists, insert the bid into the Bid table
-    const insertBidQuery = `
-      INSERT INTO Bid (ItemID, BidAmount, BidDate, BidderID) 
-      VALUES (?, ?, NOW(), ?)
-    `;
-    db.query(insertBidQuery, [itemID, bidAmount, bidderID], (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: 'Failed to place bid', error: err });
-      }
-      res.json({ message: 'Bid placed successfully!' });
-    });
-  });
-});
-*/
 app.post('/api/placebid', (req, res) => {
   const { itemID, bidAmount, bidderID } = req.body;
 

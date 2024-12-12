@@ -59,7 +59,7 @@ const SellItem = () => {
       if (res.data && res.data.message === 'Item created successfully') {
         navigate('/user-home');
       } else {
-        setMessage('Item creation failed. Check input and try again.');
+        setMessage(/*'Item creation failed. Check input and try again.'*/);
       }
     } catch (error) {
       console.error('Error creating item:', error);

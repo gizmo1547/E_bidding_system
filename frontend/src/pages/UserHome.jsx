@@ -135,7 +135,7 @@ const UserHome = () => {
       
 
       <section className="items-section">
-          <h3>{selectedCategory || 'All'} Items</h3>
+          {selectedCategory || ''} 
           <ItemList items={items} />
         </section>
       </div>
