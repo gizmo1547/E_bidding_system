@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -36,17 +34,18 @@ const ItemDetails = () => {
   }, [itemId]);
 
   useEffect(() => {
-    // fetch comments
-    axios.get(`http://localhost:8000/comments/${itemId}`)
-      .then(res => setComments(res.data))
-      .catch(err => console.error(err));
+    // Fetch comments
+    axios
+      .get(`http://localhost:8000/comments/${itemId}`)
+      .then((res) => setComments(res.data))
+      .catch((err) => console.error(err));
   }, [itemId]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
     const commentData = { itemId, content: commentContent };
     if (!token) {
-      // visitor must provide a name
+      // Visitor must provide a name
       commentData.visitorName = visitorName;
     }
     const headers = { 'Content-Type': 'application/json' };
@@ -75,10 +74,10 @@ const ItemDetails = () => {
         <div className="item-details">
           <h1>Item Details</h1>
           <div>
-            <img 
+            <img
               src={item.image_url}
-              alt={item.Name} 
-              className="item-image" 
+              alt={item.Name}
+              className="item-image"
             />
           </div>
           <h2>{item.Name}</h2>
@@ -90,7 +89,8 @@ const ItemDetails = () => {
           <ul>
             {bids.map((bid) => (
               <li key={bid.BidID}>
-                {bid.BidderName} placed a bid of ${bid.BidAmount} on {new Date(bid.BidDate).toLocaleString()}
+                {bid.BidderName} placed a bid of ${bid.BidAmount} on{' '}
+                {new Date(bid.BidDate).toLocaleString()}
               </li>
             ))}
           </ul>
@@ -105,25 +105,47 @@ const ItemDetails = () => {
       {/* Comments Section */}
       <div className="comments-section">
         <h3>Comments</h3>
-        {comments.map(c => (
-          <div key={c.CommentID}>
-            <strong>{c.UserID ? 'User' : c.VisitorName || 'Visitor'}:</strong> {c.Content} <br/>
-            <small>{new Date(c.CommentDate).toLocaleString()}</small>
-          </div>
-        ))}
-        
-        <form onSubmit={handleAddComment}>
+        <div className="comments-list">
+          {comments.map((c) => (
+            <div key={c.CommentID} className="comment-card">
+              <p>
+                <strong>
+                  {c.UserID ? 'User' : c.VisitorName || 'Visitor'}:
+                </strong>{' '}
+                {c.Content}
+              </p>
+              <small>{new Date(c.CommentDate).toLocaleString()}</small>
+            </div>
+          ))}
+        </div>
+
+        <form onSubmit={handleAddComment} className="comment-form">
           {!token && (
-            <div>
-              <label>Visitor Name:</label>
-              <input type="text" value={visitorName} onChange={e => setVisitorName(e.target.value)} required />
+            <div className="form-group">
+              <label htmlFor="visitorName">Your Name:</label>
+              <input
+                id="visitorName"
+                type="text"
+                value={visitorName}
+                onChange={(e) => setVisitorName(e.target.value)}
+                required
+                placeholder="Enter your name"
+              />
             </div>
           )}
-          <div>
-            <label>Your Comment:</label>
-            <textarea value={commentContent} onChange={e => setCommentContent(e.target.value)} required></textarea>
+          <div className="form-group">
+            <label htmlFor="commentContent">Your Comment:</label>
+            <textarea
+              id="commentContent"
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              required
+              placeholder="Write your comment here..."
+            ></textarea>
           </div>
-          <button type="submit">Submit Comment</button>
+          <button type="submit" className="submit-comment-button">
+            Submit Comment
+          </button>
         </form>
       </div>
     </div>
