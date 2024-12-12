@@ -722,6 +722,68 @@ I can help you with:
     return res.status(500).json({ reply: "Oops! Something went wrong on my end." });
   }
 });
+
+
+// Fetch comments for an item
+app.get('/comments/:itemId', (req, res) => {
+  const itemId = req.params.itemId;
+  const q = `
+    SELECT 
+      CommentID, UserID, VisitorName, Content, CommentDate
+    FROM Comment
+    WHERE ItemID = ?
+    ORDER BY CommentDate DESC
+  `;
+  db.query(q, [itemId], (err, data) => {
+    if (err) return res.status(500).json({error: err});
+    return res.json(data);
+  });
+});
+
+// Post a comment
+app.post('/comments', (req, res) => {
+  const { itemId, content, visitorName } = req.body;
+
+  // Check if a user is logged in by checking the token
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  // Default values for the insert
+  let userId = null;
+
+  if (token) {
+    // Verify token
+    jwt.verify(token, 'your_jwt_secret', (err, user) => {
+      if (err) {
+        // Token invalid, treat as visitor
+        userId = null;
+      } else {
+        // Logged in user
+        userId = user.id;
+      }
+      insertComment();
+    });
+  } else {
+    // No token, must provide visitorName
+    if (!visitorName || !content) {
+      return res.status(400).json({message: 'Visitor name and content are required for visitors.'});
+    }
+    insertComment();
+  }
+
+  function insertComment() {
+    const q = `
+      INSERT INTO Comment (UserID, VisitorName, ItemID, Content, CommentDate)
+      VALUES (?, ?, ?, ?, NOW())
+    `;
+    db.query(q, [userId, visitorName || null, itemId, content], (err, result) => {
+      if (err) return res.status(500).json({error: err});
+      return res.json({message: 'Comment added successfully!'});
+    });
+  }
+});
+
+
 /*
 app.post('/bot', (req, res) => {
   const userMessage = req.body.message;
