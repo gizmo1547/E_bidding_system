@@ -729,18 +729,31 @@ I can help you with:
 // Fetch comments for an item
 app.get('/comments/:itemId', (req, res) => {
   const itemId = req.params.itemId;
+
   const q = `
     SELECT 
-      CommentID, UserID, VisitorName, Content, CommentDate
+      Comment.CommentID,
+      Comment.UserID,
+      CASE 
+        WHEN Comment.UserID IS NOT NULL THEN User.Username 
+        ELSE 'User' 
+      END AS Username, -- Display 'User' for visitors
+      Comment.VisitorName,
+      Comment.Content,
+      Comment.CommentDate
     FROM Comment
-    WHERE ItemID = ?
-    ORDER BY CommentDate DESC
+    LEFT JOIN User ON Comment.UserID = User.UserID -- Join with User table
+    WHERE Comment.ItemID = ?
+    ORDER BY Comment.CommentDate DESC
   `;
+
   db.query(q, [itemId], (err, data) => {
-    if (err) return res.status(500).json({error: err});
+    if (err) return res.status(500).json({ error: err });
     return res.json(data);
   });
 });
+
+
 
 // Post a comment
 app.post('/comments', (req, res) => {

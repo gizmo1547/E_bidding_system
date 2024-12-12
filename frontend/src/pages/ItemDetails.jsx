@@ -36,16 +36,19 @@ const ItemDetails = () => {
 
   useEffect(() => {
     // Fetch comments
-    axios.get(`http://localhost:8000/comments/${itemId}`)
-      .then(res => setComments(res.data))
-      .catch(err => console.error(err));
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/comments/${itemId}`);
+        setComments(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchComments();
   }, [itemId]);
 
-  // Insert this useEffect here, after item is fetched
   useEffect(() => {
     if (!item || !item.Deadline) return;
-
-    let interval;
 
     const updateTimer = () => {
       const now = new Date();
@@ -54,7 +57,6 @@ const ItemDetails = () => {
 
       if (diff <= 0) {
         setTimeLeft('Bidding ended');
-        clearInterval(interval);
       } else {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -63,21 +65,11 @@ const ItemDetails = () => {
       }
     };
 
-    // Run once immediately
     updateTimer();
-
-    // Run every 60 seconds
-    interval = setInterval(updateTimer, 60000);
+    const interval = setInterval(updateTimer, 60000);
 
     return () => clearInterval(interval);
   }, [item]);
-
-  useEffect(() => {
-    axios
-      .get(`http://localhost:8000/comments/${itemId}`)
-      .then((res) => setComments(res.data))
-      .catch((err) => console.error(err));
-  }, [itemId]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -89,8 +81,8 @@ const ItemDetails = () => {
 
     try {
       await axios.post('http://localhost:8000/comments', commentData, { headers });
-      const updated = await axios.get(`http://localhost:8000/comments/${itemId}`);
-      setComments(updated.data);
+      const updatedComments = await axios.get(`http://localhost:8000/comments/${itemId}`);
+      setComments(updatedComments.data);
       setCommentContent('');
       setVisitorName('');
     } catch (err) {
@@ -141,7 +133,7 @@ const ItemDetails = () => {
           {comments.map((c) => (
             <div key={c.CommentID} className="comment-card">
               <p>
-                <strong>{c.UserID ? 'User' : c.VisitorName || 'Visitor'}:</strong> {c.Content}
+              <strong>{c.Username}:</strong> {c.Content}
               </p>
               <small>{new Date(c.CommentDate).toLocaleString()}</small>
             </div>
