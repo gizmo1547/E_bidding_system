@@ -1,33 +1,87 @@
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './Home.css'; // Optional for styling
+import './UserHome.css'; 
+import ItemList from './ItemList';
 
 const Home = () => {
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const [categories, setCategories] = useState([]);
+  const [items, setItems] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [message, setMessage] = useState('');
 
-  // Function to navigate to the login page
+  const navigate = useNavigate();
+
+  // Fetch categories from the backend
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/categories');
+      const categoryNames = res.data.map((category) => category.CategoryName);
+      setCategories(categoryNames);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setMessage('Failed to load categories. Please try again.');
+    }
+  }, []);
+
+  // Fetch items based on selected category
+  const fetchItems = useCallback(async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/items', {
+        params: selectedCategory ? { category: selectedCategory } : {},
+      });
+      setItems(res.data);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      setMessage('Failed to load items. Please try again.');
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchItems();
+  }, [fetchCategories, fetchItems]);
+
   const handleLogin = () => {
     navigate('/login');
   };
 
-  // Function to navigate to the registration (sign-up) page
-  const handleSignUp = () => {
+  const handleRegister = () => {
     navigate('/registration');
   };
 
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category === 'More' ? null : category);
+  };
+
   return (
-    <div className="home-container">
-      <h1>Welcome to E-Bidding Store</h1>
-      <div className="buttons-container">
-        <button className="login-button" onClick={handleLogin}>Login</button>
-        <button className="signup-button" onClick={handleSignUp}>Sign Up</button>
+    <div className="user-home-container">
+      <header>
+        <h1>E-Bidding Store</h1>
+        <div className="user-info">
+          <button onClick={handleLogin}>Login</button>
+          <button onClick={handleRegister}>Register</button>
+        </div>
+      </header>
+
+      {message && <p className="error">{message}</p>}
+
+      <div className="main-content">
+       
+
+        <section className="items-section">
+          <h3>Welcome! Browse items across various categories and bid if you like.</h3>
+          <h3>{selectedCategory || 'All'} Items</h3>
+          <ItemList items={items} />
+        </section>
       </div>
     </div>
   );
 };
 
 export default Home;
+
 
 /*
 import React, { useState } from 'react';
