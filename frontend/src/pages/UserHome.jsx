@@ -119,8 +119,8 @@ const UserHome = () => {
       <header>
         <h1>E-Bidding Store</h1>
         <div className="user-info">
-          <span>Welcome, {userData.Username}!</span>
-          <span>Balance: ${userData.AccountBalance?.toFixed(2) || '0.00'}</span>
+          <span>Welcome {userData.Username}</span>
+          {/*<span>Balance: ${userData.AccountBalance?.toFixed(2) || '0.00'}</span>*/}
           <button onClick={() => navigate('/add-money')}>Add Money</button>
           <button onClick={() => navigate('/account-manager')}>Account Manager</button>
           <button className="logout-button" onClick={handleLogout}>

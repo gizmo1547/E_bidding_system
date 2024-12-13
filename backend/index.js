@@ -956,6 +956,32 @@ app.get('/item/:itemId', (req, res) => {
 });
 
 
+// Route to get items owned by the logged-in user
+app.get('/my-items', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  const query = `
+    SELECT 
+      ItemID, Title, Description, AskingPrice, ListingType, image_url, Status
+    FROM 
+      Item
+    WHERE 
+      OwnerID = ?
+    AND 
+      IsRemoved = 0
+  `;
+
+  db.query(query, [userId], (err, data) => {
+    if (err) {
+      console.error('Error fetching user items:', err);
+      return res.status(500).json({ message: 'Database error', error: err });
+    }
+    res.json(data);
+  });
+});
+
+
+
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
     console.log("Connected to backend!")

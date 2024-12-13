@@ -109,8 +109,19 @@ const AccountManager = () => {
     navigate('/sell-item');
   };
 
+  const goToMyItems = () => {
+    navigate('/my-items');
+  };
+
   return (
     <div className="account-manager-container">
+      {/* Add My Items Button */}
+      <div className="my-items-btn-container">
+        <button className="my-items-btn" onClick={goToMyItems}>
+          My Items
+        </button>
+      </div>
+
       {/* Sell Item Button Positioned at Top Right */}
       <div className="sell-item-btn-container">
         <button className="sell-item-btn" onClick={goToSellItem}>
@@ -137,6 +148,7 @@ const AccountManager = () => {
         <button type="submit">Update Email</button>
       </form>
       {message && <p>{message}</p>}
+
       <form onSubmit={handleDetails}>
         {/* Form for user details */}
         <div>
@@ -218,3 +230,4 @@ const AccountManager = () => {
 };
 
 export default AccountManager;
+
