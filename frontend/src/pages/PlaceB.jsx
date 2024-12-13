@@ -318,7 +318,7 @@ const PlaceB = ({ itemId }) => {
       ) : (
         <>
           <div>
-            <strong>Deadline for bids: </strong>
+            <strong>Deadline for bids: </strong>        
             {formatDeadline(itemDeadline)} {/* Display the formatted Deadline */}
           </div>
 

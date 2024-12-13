@@ -480,7 +480,7 @@ app.get('/items-with-highest-bids', (req, res) => {
 });
 
 
-
+/*
 app.post('/api/placebid', (req, res) => {
   const { itemID, bidAmount, bidderID } = req.body;
 
@@ -529,15 +529,12 @@ app.post('/api/placebid', (req, res) => {
     });
   });
 });
+*/
 
 
 
 
 
-
-/*
-// Endpoint to place a bid
-// Place a bid route (without token authentication)
 app.post('/api/placebid', (req, res) => {
   const { itemID, bidAmount, bidderID } = req.body;
 
@@ -552,21 +549,58 @@ app.post('/api/placebid', (req, res) => {
       return res.status(400).json({ message: 'Bidder does not exist.' });
     }
 
-    // Step 2: If the bidder exists, insert the bid into the Bid table
-    const insertBidQuery = `
-      INSERT INTO Bid (ItemID, BidAmount, BidDate, BidderID) 
-      VALUES (?, ?, NOW(), ?)
-    `;
-    db.query(insertBidQuery, [itemID, bidAmount, bidderID], (err, result) => {
+    // Step 2: Get the item details (including deadline and status)
+    const itemQuery = "SELECT * FROM item WHERE ItemID = ?";
+    db.query(itemQuery, [itemID], (err, itemResult) => {
       if (err) {
-        return res.status(500).json({ message: 'Failed to place bid', error: err });
+        return res.status(500).json({ message: 'Error fetching item data.', error: err });
       }
-      res.json({ message: 'Bid placed successfully!' });
+
+      if (itemResult.length === 0) {
+        return res.status(404).json({ message: 'Item not found.' });
+      }
+
+      const item = itemResult[0];
+      const deadline = new Date(item.Deadline); // The item’s deadline
+      const currentTime = new Date(); // Current server time
+
+      // Step 3: Check if the current time is before the deadline
+      if (currentTime > deadline) {
+        return res.status(400).json({ message: 'Bidding deadline has passed. You can no longer place a bid.' });
+      }
+
+      // Step 4: Check if the highest bid has been accepted
+      const highestBidQuery = `
+        SELECT BidAmount, sAccepted 
+        FROM Bid 
+        WHERE ItemID = ? 
+        ORDER BY BidAmount DESC 
+        LIMIT 1
+      `;
+      db.query(highestBidQuery, [itemID], (err, bidResult) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error checking highest bid.', error: err });
+        }
+
+        if (bidResult.length > 0 && bidResult[0].sAccepted === 1) {
+          return res.status(400).json({ message: 'The highest bid has already been accepted. You can no longer place a bid.' });
+        }
+
+        // Step 5: If no issues, place the bid
+        const insertBidQuery = `
+          INSERT INTO Bid (ItemID, BidAmount, BidDate, BidderID) 
+          VALUES (?, ?, NOW(), ?)
+        `;
+        db.query(insertBidQuery, [itemID, bidAmount, bidderID], (err, result) => {
+          if (err) {
+            return res.status(500).json({ message: 'Failed to place bid', error: err });
+          }
+          res.json({ message: 'Bid placed successfully!' });
+        });
+      });
     });
   });
 });
-
-*/
 
 
 
@@ -655,6 +689,166 @@ app.get('/item/:itemId', (req, res) => {
 });
 
 
+
+
+// acccepting a bid
+app.post('/item/:itemId/accept-bid', (req, res) => {
+  const itemId = req.params.itemId;
+
+  // Step 1: Find the highest bid for the item
+  const highestBidQuery = `
+    SELECT 
+      Bid.BidAmount, 
+      Bid.BidderID, 
+      Item.OwnerID 
+    FROM Bid
+    INNER JOIN Item ON Bid.ItemID = Item.ItemID
+    WHERE Bid.ItemID = ? AND Bid.sAccepted = 0
+    ORDER BY Bid.BidAmount DESC
+    LIMIT 1
+  `;
+
+  db.query(highestBidQuery, [itemId], (err, bidData) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    if (bidData.length === 0) return res.status(404).json({ message: 'No valid bids available or item already sold.' });
+
+    const highestBid = bidData[0];
+    const { BidAmount, BidderID, OwnerID } = highestBid;
+
+    // Step 2: Create the transaction record
+    const transactionQuery = `
+      INSERT INTO Transaction (BuyerID, SellerID, ItemID, Amount)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(transactionQuery, [BidderID, OwnerID, itemId, BidAmount], (err, transactionResult) => {
+      if (err) return res.status(500).json({ message: 'Error creating transaction', error: err });
+
+      // Step 3: Update item status to 'Sold'
+      const updateItemStatusQuery = `
+        UPDATE Item 
+        SET Status = 'Sold'
+        WHERE ItemID = ?
+      `;
+
+      db.query(updateItemStatusQuery, [itemId], (err, updateResult) => {
+        if (err) return res.status(500).json({ message: 'Error updating item status', error: err });
+
+        // Step 4: Mark all bids as accepted
+        const updateBidsQuery = `
+          UPDATE Bid 
+          SET sAccepted = 1 
+          WHERE ItemID = ? AND BidderID = ?
+        `;
+        
+        db.query(updateBidsQuery, [itemId, BidderID], (err) => {
+          if (err) return res.status(500).json({ message: 'Error updating bid status', error: err });
+
+          // Step 5: Fetch the buyer's name from the User table
+          const buyerQuery = "SELECT Username FROM User WHERE UserID = ?";
+          db.query(buyerQuery, [BidderID], (err, buyerResult) => {
+            if (err) return res.status(500).json({ message: 'Error fetching buyer details', error: err });
+
+            const buyerName = buyerResult.length > 0 ? buyerResult[0].Username : 'Unknown Buyer';
+
+            // Step 6: Return the transaction details along with the buyer's name
+            res.status(201).json({
+              message: 'Transaction completed successfully',
+              transaction: {
+                TransactionID: transactionResult.insertId,
+                BuyerID: BidderID,
+                SellerID: OwnerID,
+                ItemID: itemId,
+                Amount: BidAmount,
+                TransactionDate: new Date().toISOString(),
+                BuyerName: buyerName  // Add BuyerName to the response
+              },
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+
+// New endpoint to allow item status change to 'Available' again
+app.post('/item/:itemId/reopen-bidding', (req, res) => {
+  const itemId = req.params.itemId;
+
+  // Step 1: Check if the item is already sold or not
+  const checkItemStatusQuery = `
+    SELECT Status FROM Item WHERE ItemID = ?
+  `;
+
+  db.query(checkItemStatusQuery, [itemId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Error fetching item status', error: err });
+
+    const itemStatus = result[0]?.Status;
+    if (itemStatus === 'Available') {
+      return res.status(400).json({ message: 'Item is already available for bidding.' });
+    }
+
+    // Step 2: Reopen the bidding by setting the status to 'Available'
+    const reopenBiddingQuery = `
+      UPDATE Item 
+      SET Status = 'Available' 
+      WHERE ItemID = ?
+    `;
+
+    db.query(reopenBiddingQuery, [itemId], (err, updateResult) => {
+      if (err) return res.status(500).json({ message: 'Error reopening bidding', error: err });
+
+      res.status(200).json({
+        message: 'Bidding reopened successfully. You can now place a bid again.'
+      });
+    });
+  });
+});
+
+
+
+// Endpoint to fetch the transaction details for an item
+app.get('/item/:itemId/transaction-details', (req, res) => {
+  const itemId = req.params.itemId;
+
+  // Step 1: Query the Transaction table to get the transaction details for the item
+  const transactionQuery = `
+    SELECT 
+      Transaction.TransactionID, 
+      Transaction.Amount, 
+      Transaction.TransactionDate, 
+      User1.Username AS SellerName, 
+      User2.Username AS BuyerName
+    FROM Transaction
+    INNER JOIN User AS User1 ON Transaction.SellerID = User1.UserID
+    INNER JOIN User AS User2 ON Transaction.BuyerID = User2.UserID
+    WHERE Transaction.ItemID = ?
+  `;
+
+  db.query(transactionQuery, [itemId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error', error: err });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Transaction not found for this item.' });
+    }
+
+    // Step 2: Send the transaction details in the response
+    const transaction = result[0];
+    res.status(200).json({
+      message: 'Transaction details fetched successfully.',
+      transaction: {
+        TransactionID: transaction.TransactionID,
+        Amount: transaction.Amount,
+        TransactionDate: transaction.TransactionDate,
+        SellerName: transaction.SellerName,
+        BuyerName: transaction.BuyerName,
+      },
+    });
+  });
+});
 
 //Connecting to backend, port number 8000
 app.listen(8000, ()=>{
