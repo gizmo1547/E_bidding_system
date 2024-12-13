@@ -14,7 +14,7 @@ const app = express()
 const db = mysql.createConnection({
    host:"localhost",//change if need it
    user:"root",//change if need it
-   password:"Awque12345@@",//change to your password
+   password:"Pass123",//change to your password
    database:"e_bidding"
 })
 
